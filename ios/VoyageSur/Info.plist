@@ -33,6 +33,12 @@
           <string>com.anisse3000.voyagesur</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>

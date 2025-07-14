@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C422DB9AC39446A9AD2BCD6 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A125EDC4CF8A707D7849804 /* ExpoModulesProvider.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2915D63389254E6B1D2B6473 /* libPods-VoyageSur.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 320D10E59ABEEAD926B858AE /* libPods-VoyageSur.a */; };
+		14C465B8C81B3EE70F433F94 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C899CB09C9DA3B7C61B26A57 /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		6D3D64C2AC894CDF901C9134 /* notif.wav in Resources */ = {isa = PBXBuildFile; fileRef = D190DFEE3848420F93642B1D /* notif.wav */; };
-		7CD6A3A7BCAB709610C72744 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 699188ED6F6E5CBB64925DD3 /* PrivacyInfo.xcprivacy */; };
+		6532E236A0100F3DC6BAD642 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6DEF5C7E670C7A702251CBAD /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		C4CB0EA5B57342FFB9F471D7 /* notif.wav in Resources */ = {isa = PBXBuildFile; fileRef = A00C5AAF8DDF483BA24D32B7 /* notif.wav */; };
+		E5054325DA8ACBEDFB7BEF78 /* libPods-VoyageSur.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 772AD81038276311851C0289 /* libPods-VoyageSur.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -21,14 +21,14 @@
 		13B07F961A680F5B00A75B9A /* VoyageSur.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoyageSur.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = VoyageSur/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = VoyageSur/Info.plist; sourceTree = "<group>"; };
-		1A125EDC4CF8A707D7849804 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-VoyageSur/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		320D10E59ABEEAD926B858AE /* libPods-VoyageSur.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VoyageSur.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		699188ED6F6E5CBB64925DD3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = VoyageSur/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		954EED5D724DDB1D7E087CC9 /* Pods-VoyageSur.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.debug.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.debug.xcconfig"; sourceTree = "<group>"; };
+		1595AF1AA91188AE65181C5F /* Pods-VoyageSur.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.debug.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.debug.xcconfig"; sourceTree = "<group>"; };
+		6DEF5C7E670C7A702251CBAD /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = VoyageSur/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7302B238510DE3A52C225496 /* Pods-VoyageSur.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.release.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.release.xcconfig"; sourceTree = "<group>"; };
+		772AD81038276311851C0289 /* libPods-VoyageSur.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VoyageSur.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00C5AAF8DDF483BA24D32B7 /* notif.wav */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = notif.wav; path = VoyageSur/notif.wav; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = VoyageSur/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C71DA2A265DA5546AED28556 /* Pods-VoyageSur.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.release.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.release.xcconfig"; sourceTree = "<group>"; };
-		D190DFEE3848420F93642B1D /* notif.wav */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = notif.wav; path = VoyageSur/notif.wav; sourceTree = "<group>"; };
+		C899CB09C9DA3B7C61B26A57 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-VoyageSur/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = VoyageSur/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* VoyageSur-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "VoyageSur-Bridging-Header.h"; path = "VoyageSur/VoyageSur-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -39,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2915D63389254E6B1D2B6473 /* libPods-VoyageSur.a in Frameworks */,
+				E5054325DA8ACBEDFB7BEF78 /* libPods-VoyageSur.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,17 +55,17 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				699188ED6F6E5CBB64925DD3 /* PrivacyInfo.xcprivacy */,
-				D190DFEE3848420F93642B1D /* notif.wav */,
+				A00C5AAF8DDF483BA24D32B7 /* notif.wav */,
+				6DEF5C7E670C7A702251CBAD /* PrivacyInfo.xcprivacy */,
 			);
 			name = VoyageSur;
 			sourceTree = "<group>";
 		};
-		142093C85C437BC9E29B06FD /* Pods */ = {
+		1BB69EEE86331006D1273E92 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				954EED5D724DDB1D7E087CC9 /* Pods-VoyageSur.debug.xcconfig */,
-				C71DA2A265DA5546AED28556 /* Pods-VoyageSur.release.xcconfig */,
+				1595AF1AA91188AE65181C5F /* Pods-VoyageSur.debug.xcconfig */,
+				7302B238510DE3A52C225496 /* Pods-VoyageSur.release.xcconfig */,
 			);
 			name = Pods;
 			path = Pods;
@@ -75,15 +75,15 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				320D10E59ABEEAD926B858AE /* libPods-VoyageSur.a */,
+				772AD81038276311851C0289 /* libPods-VoyageSur.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		64139D2E124D55673376ECFC /* ExpoModulesProviders */ = {
+		494B2DDD8419F95361781731 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				C1271ACA333F5FCB7D62121E /* VoyageSur */,
+				DBEAF02C6848CC943CDB79D1 /* VoyageSur */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -102,8 +102,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				142093C85C437BC9E29B06FD /* Pods */,
-				64139D2E124D55673376ECFC /* ExpoModulesProviders */,
+				1BB69EEE86331006D1273E92 /* Pods */,
+				494B2DDD8419F95361781731 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -127,10 +127,10 @@
 			path = VoyageSur/Supporting;
 			sourceTree = "<group>";
 		};
-		C1271ACA333F5FCB7D62121E /* VoyageSur */ = {
+		DBEAF02C6848CC943CDB79D1 /* VoyageSur */ = {
 			isa = PBXGroup;
 			children = (
-				1A125EDC4CF8A707D7849804 /* ExpoModulesProvider.swift */,
+				C899CB09C9DA3B7C61B26A57 /* ExpoModulesProvider.swift */,
 			);
 			name = VoyageSur;
 			sourceTree = "<group>";
@@ -143,13 +143,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "VoyageSur" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				F2A48B9714CD50CE0DE2E981 /* [Expo] Configure project */,
+				70A0893ABCA8CD8890E3561E /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				A1810EEABD63994252956D1A /* [CP] Embed Pods Frameworks */,
+				222DE0D91D5A28582CAE0790 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -169,8 +169,8 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = XB4J8ZF2UP;
 						LastSwiftMigration = 1250;
+						DevelopmentTeam = "XB4J8ZF2UP";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -201,8 +201,8 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				7CD6A3A7BCAB709610C72744 /* PrivacyInfo.xcprivacy in Resources */,
-				6D3D64C2AC894CDF901C9134 /* notif.wav in Resources */,
+				C4CB0EA5B57342FFB9F471D7 /* notif.wav in Resources */,
+				6532E236A0100F3DC6BAD642 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +246,43 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		222DE0D91D5A28582CAE0790 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VoyageSur/Pods-VoyageSur-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VoyageSur/Pods-VoyageSur-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		70A0893ABCA8CD8890E3561E /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-VoyageSur/expo-configure-project.sh\"\n";
+		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -259,6 +296,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXNotifications/ExpoNotifications_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GTMAppAuth/GTMAppAuth_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GTMSessionFetcher/GTMSessionFetcher_Core_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle",
@@ -299,6 +337,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoNotifications_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GTMAppAuth_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GTMSessionFetcher_Core_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
@@ -336,43 +375,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VoyageSur/Pods-VoyageSur-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A1810EEABD63994252956D1A /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-VoyageSur/Pods-VoyageSur-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VoyageSur/Pods-VoyageSur-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F2A48B9714CD50CE0DE2E981 /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-VoyageSur/expo-configure-project.sh\"\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -381,7 +383,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				0C422DB9AC39446A9AD2BCD6 /* ExpoModulesProvider.swift in Sources */,
+				14C465B8C81B3EE70F433F94 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,15 +392,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 954EED5D724DDB1D7E087CC9 /* Pods-VoyageSur.debug.xcconfig */;
+			baseConfigurationReference = 1595AF1AA91188AE65181C5F /* Pods-VoyageSur.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = VoyageSur/VoyageSur.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = XB4J8ZF2UP;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -418,26 +417,26 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.anisse3000.voyagesur;
-				PRODUCT_NAME = VoyageSur;
+				PRODUCT_NAME = "VoyageSur";
 				SWIFT_OBJC_BRIDGING_HEADER = "VoyageSur/VoyageSur-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "XB4J8ZF2UP";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C71DA2A265DA5546AED28556 /* Pods-VoyageSur.release.xcconfig */;
+			baseConfigurationReference = 7302B238510DE3A52C225496 /* Pods-VoyageSur.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = VoyageSur/VoyageSur.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = XB4J8ZF2UP;
 				INFOPLIST_FILE = VoyageSur/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -452,11 +451,14 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.anisse3000.voyagesur;
-				PRODUCT_NAME = VoyageSur;
+				PRODUCT_NAME = "VoyageSur";
 				SWIFT_OBJC_BRIDGING_HEADER = "VoyageSur/VoyageSur-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "XB4J8ZF2UP";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Release;
 		};

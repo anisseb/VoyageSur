@@ -54,6 +54,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-apple-authentication",
+    [
+      "@react-native-google-signin/google-signin",
+      {
+        "iosUrlScheme": "com.googleusercontent.apps.632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u"
+      }
+    ],
     "@react-native-google-signin/google-signin",
     [
       "expo-splash-screen",

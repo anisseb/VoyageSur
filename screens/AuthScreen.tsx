@@ -128,8 +128,8 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
   const configureGoogleSignIn = async () => {
     try {
       GoogleSignin.configure({
-        webClientId: '632781822153-9ce3810cf7d86d1127d518.apps.googleusercontent.com', // À remplacer par votre vrai webClientId
-        iosClientId: '632781822153-9ce3810cf7d86d1127d518.apps.googleusercontent.com', // À remplacer par votre vrai iosClientId
+        webClientId: '632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u.apps.googleusercontent.com',
+        iosClientId: '632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u.apps.googleusercontent.com',
         offlineAccess: true,
       });
       
@@ -484,8 +484,25 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
       let userInfo;
       try {
         userInfo = await GoogleSignin.signIn();
-      } catch (signInError) {
+      } catch (signInError: any) {
         console.log('Erreur lors de l\'authentification Google:', signInError);
+        
+        // Gestion spécifique des erreurs d'URL scheme
+        if (signInError.message?.includes('URL schemes') || 
+            signInError.message?.includes('missing support')) {
+          showErrorAlert(
+            'Erreur de configuration', 
+            'Google Sign-In n\'est pas correctement configuré. Veuillez vérifier la configuration des URL schemes.'
+          );
+        } else if (signInError.code === 'SIGN_IN_CANCELLED' || 
+                   signInError.code === 'SIGN_IN_REQUIRED' ||
+                   signInError.code === 'SIGN_IN_FAILED' ||
+                   signInError.message?.includes('cancelled') ||
+                   signInError.message?.includes('canceled')) {
+          console.log('Authentification Google annulée par l\'utilisateur');
+        } else {
+          showErrorAlert('Erreur', `Erreur lors de l'authentification Google: ${signInError.message}`);
+        }
         return;
       }
 
@@ -815,6 +832,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 20,
     marginBottom: 15,
+    padding: 20,
     marginHorizontal: 20,
     shadowColor: colors.black,
     shadowOffset: {
@@ -826,10 +844,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   appSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text.secondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    paddingBottom: 10,
   },
   formContainer: {
     flex: 1,
