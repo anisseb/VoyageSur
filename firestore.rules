@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Règles pour la collection users
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Règles pour la collection new-trip (voyages actifs)
+    match /new-trip/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Règles pour la collection old-trip (voyages passés)
+    match /old-trip/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+            
+    match /pays/{document} {
+      allow read, write: if true; // Temporairement ouvert pour les tests
+    }
+    
+    // Règles pour la collection 'villes'
+    match /villes/{document} {
+      allow read, write: if true; // Temporairement ouvert pour les tests
+    }
+    
+    // Règles pour la collection 'vaccins'
+    match /vaccins/{document} {
+      allow read, write: if true; // Temporairement ouvert pour les tests
+    }
+    
+    // Règles pour la collection 'medicaments'
+    match /medicaments/{document} {
+      allow read, write: if true; // Temporairement ouvert pour les tests
+    }
+
+    // Règles pour la collection 'symptomes'
+    match /symptomes/{document} {
+      allow read, write: if true; // Temporairement ouvert pour les tests
+    }
+  }
+} 
