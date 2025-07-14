@@ -1,7 +1,7 @@
 import { travelPlanService } from './firebaseService';
 
 class CleanupService {
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
   private isRunning = false;
   private currentUserId: string | null = null;
 

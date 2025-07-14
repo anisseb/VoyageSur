@@ -3,7 +3,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "VoyageSur",
-  slug: "VoyageSur",
+  slug: "voyagesur",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/voyage-sur-logo.png",
@@ -105,7 +105,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       origin: false
     },
     eas: {
-      projectId: "05388435-4c2f-49e4-83a2-1ed0d62649b4"
+      projectId: "947c35ea-64ae-4074-8009-0630baeb6ed0"
     },
     EXPO_PUBLIC_REVENUECAT_API_KEY_IOS: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS || "",
     EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID || ""

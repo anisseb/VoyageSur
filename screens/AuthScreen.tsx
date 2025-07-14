@@ -5,11 +5,12 @@ import {
   TextInput, 
   TouchableOpacity, 
   StyleSheet, 
-  KeyboardAvoidingView, 
   Platform,
   ScrollView,
   ActivityIndicator,
   Alert,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { 
   getAuth, 
@@ -25,8 +26,8 @@ import { db } from '../config/firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { showErrorAlert, showSuccessAlert } from '../utils/alerts';
 import { Image } from 'expo-image';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '../theme/colors';
+
 import * as SecureStore from 'expo-secure-store';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -44,7 +45,6 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
   const [savedUserName, setSavedUserName] = useState('');
   const [showFullForm, setShowFullForm] = useState(false);
@@ -53,11 +53,9 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showReconnectButton, setShowReconnectButton] = useState(false);
   const auth = getAuth();
-  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const initializeAuth = async () => {
-      await checkBiometricSupport();
       await checkSavedCredentials();
       await checkAppleAuthAvailability();
       await configureGoogleSignIn();
@@ -80,11 +78,7 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
     initializeAuth();
   }, []);
 
-  const checkBiometricSupport = async () => {
-    const compatible = await LocalAuthentication.hasHardwareAsync();
-    const enrolled = await LocalAuthentication.isEnrolledAsync();
-    setIsBiometricSupported(compatible && enrolled);
-  };
+
 
   const checkSavedCredentials = async () => {
     try {
@@ -147,59 +141,7 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
     }
   };
 
-  const handleBiometricAuth = async () => {
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authentification avec Face ID',
-        fallbackLabel: 'Utiliser le mot de passe',
-        disableDeviceFallback: false,
-        cancelLabel: 'Annuler'
-      });
 
-      if (result.success) {
-        const savedEmail = await SecureStore.getItemAsync('userEmail');
-        const savedAuthMethod = await SecureStore.getItemAsync('authMethod');
-        
-        if (savedEmail && savedAuthMethod === 'email') {
-          setIsLoading(true);
-          try {
-            const savedPassword = await SecureStore.getItemAsync('userPassword');
-            if (savedPassword) {
-              await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
-              // Navigation sera gérée automatiquement par AuthContext
-            }
-          } catch (error) {
-            console.error('Erreur lors de la connexion:', error);
-            showErrorAlert('Erreur', 'Échec de la connexion automatique');
-          } finally {
-            setIsLoading(false);
-          }
-        } else if (savedEmail && savedAuthMethod === 'apple') {
-          setIsLoading(true);
-          try {
-            await handleAppleAuth();
-          } catch (error) {
-            console.error('Erreur lors de la reconnexion Apple:', error);
-            showErrorAlert('Erreur', 'Échec de la reconnexion Apple');
-          } finally {
-            setIsLoading(false);
-          }
-        } else if (savedEmail && savedAuthMethod === 'google') {
-          setIsLoading(true);
-          try {
-            await handleGoogleQuickAuth();
-          } catch (error) {
-            console.error('Erreur lors de la reconnexion Google:', error);
-            showErrorAlert('Erreur', 'Échec de la reconnexion Google');
-          } finally {
-            setIsLoading(false);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'authentification biométrique:', error);
-    }
-  };
 
   const isPasswordValid = (pass: string) => {
     const hasMinLength = pass.length >= 8;
@@ -244,38 +186,7 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         
-        if (!hasSavedCredentials && isBiometricSupported) {
-          const shouldSave = await new Promise((resolve) => {
-            Alert.alert(
-              'Sauvegarder les identifiants',
-              'Voulez-vous utiliser Face ID pour vous connecter plus rapidement ?',
-              [
-                {
-                  text: 'Non',
-                  onPress: () => resolve(false),
-                  style: 'cancel'
-                },
-                {
-                  text: 'Oui',
-                  onPress: () => resolve(true)
-                }
-              ]
-            );
-          });
 
-          if (shouldSave) {
-            // Récupérer le nom d'utilisateur depuis Firestore si disponible
-            try {
-              const userDoc = await getDoc(doc(db, 'users', auth.currentUser?.uid || ''));
-              const displayName = userDoc.exists() ? userDoc.data().firstName : '';
-              await saveCredentials(email, password, displayName);
-            } catch (error) {
-              // Si on ne peut pas récupérer le nom, sauvegarder sans
-              await saveCredentials(email, password);
-            }
-            setHasSavedCredentials(true);
-          }
-        }
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const userId = userCredential.user.uid;
@@ -652,16 +563,11 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
 
   return (
     <>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={[styles.header, { marginTop: insets.top }]}>
-            <Image source={require('../assets/images/voyage-sur-logo.png')}style={styles.logo} contentFit="cover" cachePolicy="memory-disk" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Image source={require('../assets/images/voyage-sur-logo.png')} style={styles.logo} contentFit="cover" cachePolicy="memory-disk" />
             <Text style={styles.appSubtitle}>
               Votre compagnon santé pour des voyages en toute sérénité
             </Text>
@@ -763,21 +669,13 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
             
             <TouchableOpacity 
               style={[styles.button, isLoading && styles.buttonDisabled]} 
-              onPress={isLogin ? (isBiometricSupported && !email && !password ? handleBiometricAuth : handleAuth) : handleAuth}
+              onPress={handleAuth}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <View style={styles.buttonContent}>
-                  {isLogin && isBiometricSupported && !email && !password && (
-                    <MaterialCommunityIcons 
-                      name={Platform.OS === 'ios' ? 'face-recognition' : 'fingerprint'} 
-                      size={24} 
-                      color="#fff" 
-                      style={styles.buttonIcon}
-                    />
-                  )}
                   <Text style={styles.buttonText}>
                     {isLogin ? 'Se connecter' : 'S\'inscrire'}
                   </Text>
@@ -890,8 +788,8 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
               </TouchableOpacity>
             )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </SafeAreaView>
       
       <ResetPassword 
         visible={showResetPassword}
@@ -904,131 +802,134 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.background,
   },
-  scrollContainer: {
-    flexGrow: 1,
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   header: {
     flex: 0.25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  appTitle: {
-    fontSize: 32,
-    color: '#60a5fa',
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    marginBottom: 15,
+    marginHorizontal: 20,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   appSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: colors.text.secondary,
     textAlign: 'center',
     paddingHorizontal: 20,
   },
   formContainer: {
-    flex: 0.75,
-    backgroundColor: '#1a1a1a',
-    padding: 25,
-    paddingTop: 15,
-    shadowColor: '#000',
+    flex: 1,
+    backgroundColor: colors.surface,
+    padding: 15,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
-      height: -3,
+      height: 4,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   title: {
-    fontSize: 24,
-    color: '#fff',
+    fontSize: 22,
+    color: colors.text.primary,
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: 15,
     marginBottom: 15,
     fontWeight: 'bold',
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 12,
   },
   inputLabel: {
-    color: '#999',
+    color: colors.text.secondary,
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 4,
+    fontWeight: '500',
   },
   input: {
-    backgroundColor: '#2d2d2d',
+    backgroundColor: colors.gray[50],
     borderRadius: 12,
     padding: 15,
-    color: '#fff',
+    color: colors.text.primary,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: colors.border,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2d2d2d',
+    backgroundColor: colors.gray[50],
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: colors.border,
   },
   passwordInput: {
     flex: 1,
     padding: 15,
-    color: '#fff',
+    color: colors.text.primary,
     fontSize: 16,
   },
   eyeIcon: {
     padding: 15,
   },
   passwordHint: {
-    color: '#999',
+    color: colors.text.secondary,
     fontSize: 12,
     marginTop: 5,
     marginLeft: 4,
     fontStyle: 'italic',
   },
   button: {
-    backgroundColor: '#60a5fa',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     marginTop: 15,
-    shadowColor: '#60a5fa',
+    shadowColor: colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,
     },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
     height: 50,
   },
   buttonDisabled: {
-    backgroundColor: '#4a5568',
+    backgroundColor: colors.gray[400],
     shadowOpacity: 0,
   },
   appleButton: {
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
     padding: 16,
     borderRadius: 12,
     marginTop: 12,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1045,14 +946,14 @@ const styles = StyleSheet.create({
       height: 4,
     },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
     height: 50,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.white,
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
@@ -1061,16 +962,18 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   switchText: {
-    color: '#60a5fa',
+    color: colors.primary,
     textAlign: 'center',
     fontSize: 14,
+    fontWeight: '500',
   },
   orText: {
-    color: '#60a5fa',
+    color: colors.primary,
     textAlign: 'center',
     fontSize: 14,
     marginTop: 10,
     marginBottom: 5,
+    fontWeight: '500',
   },
   forgotPasswordButton: {
     alignSelf: 'flex-end',
@@ -1079,8 +982,9 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   forgotPasswordText: {
-    color: '#60a5fa',
+    color: colors.primary,
     fontSize: 14,
+    fontWeight: '500',
   },
   buttonContent: {
     flexDirection: 'row',
@@ -1097,20 +1001,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 15,
     padding: 12,
-    backgroundColor: 'rgba(96, 165, 250, 0.1)',
+    backgroundColor: colors.primary + '10',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#60a5fa',
+    borderColor: colors.primary,
   },
   reconnectButtonText: {
-    color: '#60a5fa',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: 'bold',
   },
   logo: {
-    width: 220,
-    height: 160,
-    marginBottom: 5,
-    borderRadius: 20,
+    width: 150,
+    height: 110,
+    borderRadius: 15,
   },
 }); 

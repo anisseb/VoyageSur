@@ -10,6 +10,7 @@ import {
   Linking,
   Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
@@ -65,6 +66,17 @@ interface SymptomData {
   label: string;
 }
 
+interface CachedTripData {
+  trip: TravelPlan;
+  cityData: CityData | null;
+  vaccines: VaccineData[];
+  medicines: MedicineData[];
+  symptoms: SymptomData[];
+  weatherData: WeatherResponse | null;
+  recommendationData: RecommendationResponse | null;
+  timestamp: number;
+}
+
 export default function TripDetailsScreen({ navigation, route }: TripDetailsScreenProps) {
   const { tripId } = route.params;
   const [trip, setTrip] = useState<TravelPlan | null>(null);
@@ -80,11 +92,87 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   const [expandedMedicines, setExpandedMedicines] = useState<{ [key: string]: boolean }>({});
   const [expandedSymptoms, setExpandedSymptoms] = useState<{ [key: string]: boolean }>({});
   const [expandedRecommendations, setExpandedRecommendations] = useState<{ [key: string]: boolean }>({});
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [cacheTimestamp, setCacheTimestamp] = useState<number | null>(null);
   const { user } = useAuth();
+
+  // Fonction utilitaire pour convertir les dates
+  const formatDate = (date: any): string => {
+    if (!date) return 'Date non disponible';
+    
+    // Si c'est déjà une chaîne, essayer de la convertir en Date
+    if (typeof date === 'string') {
+      const dateObj = new Date(date);
+      if (!isNaN(dateObj.getTime())) {
+        return dateObj.toLocaleDateString('fr-FR');
+      }
+      return date; // Retourner la chaîne si la conversion échoue
+    }
+    
+    // Si c'est un objet Date
+    if (date instanceof Date) {
+      return date.toLocaleDateString('fr-FR');
+    }
+    
+    // Si c'est un timestamp
+    if (typeof date === 'number') {
+      return new Date(date).toLocaleDateString('fr-FR');
+    }
+    
+    return 'Date non disponible';
+  };
 
   useEffect(() => {
     loadTripDetails();
   }, [tripId]);
+
+  // Fonctions pour gérer le cache local
+  const getCacheKey = (tripId: string) => `trip_details_${tripId}`;
+
+  const saveToCache = async (tripId: string, data: CachedTripData) => {
+    try {
+      const cacheKey = getCacheKey(tripId);
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(data));
+      console.log('Données sauvegardées en cache pour le voyage:', tripId);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde en cache:', error);
+    }
+  };
+
+  const loadFromCache = async (tripId: string): Promise<CachedTripData | null> => {
+    try {
+      const cacheKey = getCacheKey(tripId);
+      const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (cachedData) {
+        const parsed = JSON.parse(cachedData);
+        // Vérifier si le cache n'est pas trop ancien (7 jours)
+        const cacheAge = Date.now() - parsed.timestamp;
+        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours
+        if (cacheAge < maxAge) {
+          console.log('Données chargées depuis le cache pour le voyage:', tripId);
+          
+          // Convertir les dates en objets Date
+          if (parsed.trip) {
+            if (parsed.trip.startDate && typeof parsed.trip.startDate === 'string') {
+              parsed.trip.startDate = new Date(parsed.trip.startDate);
+            }
+            if (parsed.trip.endDate && typeof parsed.trip.endDate === 'string') {
+              parsed.trip.endDate = new Date(parsed.trip.endDate);
+            }
+          }
+          
+          return parsed;
+        } else {
+          console.log('Cache expiré pour le voyage:', tripId);
+          await AsyncStorage.removeItem(cacheKey);
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur lors du chargement du cache:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (trip && trip.city) {
@@ -96,44 +184,100 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   const loadTripDetails = async () => {
     try {
       setLoading(true);
+      setIsOfflineMode(false);
       
-      // Charger les détails du voyage
-      const tripData = await travelPlanService.getById(user?.uid || '', tripId);
+      // Essayer de charger depuis le cache d'abord
+      const cachedData = await loadFromCache(tripId);
+      if (cachedData) {
+        setTrip(cachedData.trip);
+        setCityData(cachedData.cityData);
+        setVaccines(cachedData.vaccines);
+        setMedicines(cachedData.medicines);
+        setSymptoms(cachedData.symptoms);
+        setWeatherData(cachedData.weatherData);
+        setRecommendationData(cachedData.recommendationData);
+        setCacheTimestamp(cachedData.timestamp);
+        setIsOfflineMode(true);
+        setLoading(false);
+        return;
+      }
+
+      // Si pas de cache, charger depuis le serveur
+      let tripData: TravelPlan | null = null;
       
+      if (user?.uid) {
+        // Essayer de charger depuis Firebase
+        try {
+          tripData = await travelPlanService.getById(user.uid, tripId);
+        } catch (error) {
+          console.log('Erreur Firebase, mode hors ligne activé');
+          setIsOfflineMode(true);
+        }
+      }
+
+      if (!tripData) {
+        Alert.alert(
+          'Mode hors ligne',
+          'Aucune donnée en cache disponible. Veuillez vous connecter pour charger les détails du voyage.',
+          [{ text: 'OK' }]
+        );
+        setLoading(false);
+        return;
+      }
+
       setTrip(tripData);
 
       // Si une ville est sélectionnée, charger ses données
-      if (tripData && tripData.cityId) {
-        const cityInfo = await cityService.getById(tripData.cityId);
-        setCityData(cityInfo);
+      if (tripData.cityId) {
+        try {
+          const cityInfo = await cityService.getById(tripData.cityId);
+          setCityData(cityInfo);
 
-        // Charger les détails des vaccins
-        if (cityInfo.vaccins && cityInfo.vaccins.length > 0) {
-          const vaccinesData = await vaccineService.getByIds(cityInfo.vaccins);
-          setVaccines(vaccinesData);
-        }
-
-        // Charger les détails des médicaments
-        if (cityInfo.medicaments && cityInfo.medicaments.length > 0) {
-          const medicinesData = await medicineService.getByIds(cityInfo.medicaments);
-          setMedicines(medicinesData);
-          
-          // Extraire tous les IDs de symptômes uniques
-          const allSymptomIds = new Set<string>();
-          medicinesData.forEach(medicine => {
-            if (medicine.symptomes && Array.isArray(medicine.symptomes)) {
-              medicine.symptomes.forEach((symptomId: string) => allSymptomIds.add(symptomId));
-            }
-          });
-          
-          // Charger les détails des symptômes
-          if (allSymptomIds.size > 0) {
-            const symptomsData = await symptomService.getByIds(Array.from(allSymptomIds));
-            setSymptoms(symptomsData);
+          // Charger les détails des vaccins
+          if (cityInfo.vaccins && cityInfo.vaccins.length > 0) {
+            const vaccinesData = await vaccineService.getByIds(cityInfo.vaccins);
+            setVaccines(vaccinesData);
           }
+
+          // Charger les détails des médicaments
+          if (cityInfo.medicaments && cityInfo.medicaments.length > 0) {
+            const medicinesData = await medicineService.getByIds(cityInfo.medicaments);
+            setMedicines(medicinesData);
+            
+            // Extraire tous les IDs de symptômes uniques
+            const allSymptomIds = new Set<string>();
+            medicinesData.forEach(medicine => {
+              if (medicine.symptomes && Array.isArray(medicine.symptomes)) {
+                medicine.symptomes.forEach((symptomId: string) => allSymptomIds.add(symptomId));
+              }
+            });
+            
+            // Charger les détails des symptômes
+            if (allSymptomIds.size > 0) {
+              const symptomsData = await symptomService.getByIds(Array.from(allSymptomIds));
+              setSymptoms(symptomsData);
+            }
+          }
+
+          // Sauvegarder en cache
+          const cacheData: CachedTripData = {
+            trip: tripData,
+            cityData: cityInfo,
+            vaccines,
+            medicines,
+            symptoms,
+            weatherData: null,
+            recommendationData: null,
+            timestamp: Date.now()
+          };
+          await saveToCache(tripId, cacheData);
+        } catch (error) {
+          console.error('Erreur lors du chargement des données de la ville:', error);
+          setIsOfflineMode(true);
         }
       }
     } catch (error) {
+      console.error('Erreur lors du chargement des détails du voyage:', error);
       Alert.alert('Erreur', 'Impossible de charger les détails du voyage');
     } finally {
       setLoading(false);
@@ -151,6 +295,16 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
         endDate: trip.endDate
       });
       setWeatherData(weather);
+      
+      // Sauvegarder en cache
+      if (trip && cityData) {
+        const cachedData = await loadFromCache(tripId);
+        if (cachedData) {
+          cachedData.weatherData = weather;
+          cachedData.timestamp = Date.now();
+          await saveToCache(tripId, cachedData);
+        }
+      }
     } catch (error) {
       console.error('Erreur lors du chargement de la météo:', error);
       // Afficher un message d'erreur plus informatif
@@ -189,6 +343,16 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
         duration: trip.duration
       });
       setRecommendationData(recommendations);
+      
+      // Sauvegarder en cache
+      if (trip && cityData) {
+        const cachedData = await loadFromCache(tripId);
+        if (cachedData) {
+          cachedData.recommendationData = recommendations;
+          cachedData.timestamp = Date.now();
+          await saveToCache(tripId, cachedData);
+        }
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des recommandations:', error);
       if (error instanceof Error) {
@@ -293,6 +457,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header avec image de la ville */}
         <View style={styles.header}>
+          {/* Indicateur mode hors ligne */}
           {cityData?.image_ville ? (
             <Image
               source={{ uri: cityData.image_ville }}
@@ -326,7 +491,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
             <View style={styles.infoItem}>
               <Ionicons name="calendar" size={20} color={colors.primary} />
               <Text style={styles.infoText}>
-                {trip.startDate.toLocaleDateString('fr-FR')} - {trip.endDate.toLocaleDateString('fr-FR')}
+                {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
               </Text>
             </View>
             <View style={styles.infoItem}>
@@ -653,11 +818,13 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
                       >
                         <View style={styles.symptomHeaderContent}>
                           <Ionicons name="medical" size={20} color={colors.medicine} />
-                          <Text style={styles.infoTitle}>{symptom.label}</Text>
-                          <View style={styles.medicineCount}>
-                            <Text style={styles.medicineCountText}>
-                              {symptomMedicines.length} médicament(s)
-                            </Text>
+                          <View style={styles.symptomTextContainer}>
+                            <Text style={styles.infoTitle}>{symptom.label}</Text>
+                            <View style={styles.medicineCount}>
+                              <Text style={styles.medicineCountText}>
+                                {symptomMedicines.length} médicament(s)
+                              </Text>
+                            </View>
                           </View>
                         </View>
                         <Ionicons 
@@ -851,6 +1018,17 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
             </View>
           </View>
         )}
+        {isOfflineMode && (
+          <View style={styles.offlineIndicator}>
+            <Ionicons name="cloud-offline" size={16} color={colors.white} />
+            <Text style={styles.offlineText}>Mode hors ligne</Text>
+            {cacheTimestamp && (
+              <Text style={styles.cacheTimestamp}>
+                Cache du {new Date(cacheTimestamp).toLocaleDateString('fr-FR')}
+              </Text>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -980,6 +1158,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text.primary,
     marginLeft: 8,
+    width: '90%',
   },
   infoContent: {
     fontSize: 14,
@@ -1086,15 +1265,20 @@ const styles = StyleSheet.create({
   },
   symptomHeaderContent: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flex: 1,
+  },
+  symptomTextContainer: {
+    flex: 1,
+    marginLeft: 8,
   },
   medicineCount: {
     backgroundColor: colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
-    marginLeft: 8,
+    marginTop: 4,
+    alignSelf: 'flex-start',
   },
   medicineCountText: {
     color: colors.white,
@@ -1152,5 +1336,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     marginBottom: 15,
+  },
+  offlineIndicator: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    marginBottom: 10,
+    marginHorizontal: 40,
+  },
+  offlineText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  cacheTimestamp: {
+    color: colors.white,
+    fontSize: 10,
+    opacity: 0.8,
+    marginLeft: 8,
   },
 });

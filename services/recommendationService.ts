@@ -28,7 +28,7 @@ class RecommendationService {
   private readonly API_KEY = process.env.EXPO_PUBLIC_MISTRAL_API_KEY;
   private readonly BASE_URL = 'https://api.mistral.ai/v1/chat/completions';
   private readonly CACHE_PREFIX = 'recommendation_cache_';
-  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
+  private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 jours en millisecondes
 
   /**
    * Génère une clé de cache unique pour une demande de recommandation

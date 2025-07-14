@@ -501,16 +501,20 @@ export const countryService = {
 
 // Service pour les villes
 export const cityService = {
-  async getByCountryId(countryId: string): Promise<any[]> {
+  async getByCountryId(countryId: string): Promise<{ id: string; name: string; countryId: string }[]> {
     const q = query(
       collection(db, 'villes'),
       where('pays_id', '==', countryId)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.nom || data.name || 'Ville sans nom',
+        countryId: data.pays_id || countryId
+      };
+    });
   },
 
   async getById(cityId: string): Promise<any> {
@@ -520,6 +524,20 @@ export const cityService = {
       return {
         id: docSnap.id,
         ...docSnap.data()
+      };
+    }
+    throw new Error('Ville non trouvée');
+  },
+
+  async getByIdSimple(cityId: string): Promise<{ id: string; name: string; countryId: string }> {
+    const docRef = doc(db, 'villes', cityId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.nom || data.name || 'Ville sans nom',
+        countryId: data.pays_id || ''
       };
     }
     throw new Error('Ville non trouvée');
