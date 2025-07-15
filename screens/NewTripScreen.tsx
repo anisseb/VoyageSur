@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   FlatList,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -329,23 +330,47 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
           <View style={styles.row}>
             <View style={[styles.inputGroup, styles.halfWidth]}>
               <Text style={styles.label}>Date de départ *</Text>
-              <DateTimePicker
-                value={formData.startDate}
-                mode="date"
-                display="default"
-                onChange={handleStartDateChange}
-                minimumDate={new Date()}
-              />
+              {Platform.OS === 'ios' ? (
+                <DateTimePicker
+                  value={formData.startDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleStartDateChange}
+                  minimumDate={new Date()}
+                />
+              ) : (
+                <TouchableOpacity
+                  style={styles.dateSelectorContainer}
+                  onPress={() => setShowStartDatePicker(true)}
+                >
+                  <Text style={styles.dateSelectorText}>
+                    {formatDate(formData.startDate)}
+                  </Text>
+                  <Ionicons name="calendar" size={20} color={colors.text.secondary} />
+                </TouchableOpacity>
+              )}
             </View>
             <View style={[styles.inputGroup, styles.halfWidth]}>
               <Text style={styles.label}>Date de retour *</Text>
-              <DateTimePicker
-                value={formData.endDate}
-                mode="date"
-                display="default"
-                onChange={handleEndDateChange}
-                minimumDate={formData.startDate}
-              />
+              {Platform.OS === 'ios' ? (
+                <DateTimePicker
+                  value={formData.endDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleEndDateChange}
+                  minimumDate={formData.startDate}
+                />
+              ) : (
+                <TouchableOpacity
+                  style={styles.dateSelectorContainer}
+                  onPress={() => setShowEndDatePicker(true)}
+                >
+                  <Text style={styles.dateSelectorText}>
+                    {formatDate(formData.endDate)}
+                  </Text>
+                  <Ionicons name="calendar" size={20} color={colors.text.secondary} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -507,8 +532,8 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
         </View>
       </Modal>
 
-      {/* DatePickers */}
-      {showStartDatePicker && (
+      {/* DatePickers - Android uniquement */}
+      {Platform.OS === 'android' && showStartDatePicker && (
         <DateTimePicker
           value={formData.startDate}
           mode="date"
@@ -518,7 +543,7 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
         />
       )}
 
-      {showEndDatePicker && (
+      {Platform.OS === 'android' && showEndDatePicker && (
         <DateTimePicker
           value={formData.endDate}
           mode="date"

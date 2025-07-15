@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  SafeAreaView,
   StatusBar,
   Image,
 } from 'react-native';
@@ -17,6 +15,7 @@ import { TravelPlan } from '../types';
 import { travelPlanService, cityService } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface HomeScreenProps {
   navigation: any;
@@ -30,9 +29,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    loadTrips();
-  }, []);
+  // Recharger les voyages quand l'écran devient actif
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTrips();
+    }, [])
+  );
 
   const loadTrips = async () => {
     try {
@@ -276,19 +278,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 </TouchableOpacity>
               );
             })}
-          </View>
-        )}
-
-        {/* Message si aucun voyage */}
-        {!loading && activeTrips.length === 0 && pastTrips.length === 0 && (
-          <View style={styles.section}>
-            <View style={styles.emptyState}>
-              <Ionicons name="airplane-outline" size={48} color={colors.gray[400]} />
-              <Text style={styles.emptyText}>Aucun voyage</Text>
-              <Text style={styles.emptySubtext}>
-                Créez votre premier voyage pour commencer
-              </Text>
-            </View>
           </View>
         )}
       </ScrollView>

@@ -21,7 +21,11 @@ import { colors } from '../theme/colors';
 import { useAuth } from '../contexts/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function ProfileScreen() {
+interface ProfileScreenProps {
+  navigation: any;
+}
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { userProfile, signOutUser, updateUserProfile } = useAuth();
   const [isPremium, setIsPremium] = useState(userProfile?.isPremium || false);
   const [isEditing, setIsEditing] = useState(false);
@@ -266,16 +270,10 @@ export default function ProfileScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <Ionicons name="language" size={24} color={colors.primary} />
-                <Text style={styles.settingText}>Langue</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('Privacy')}
+            >
               <View style={styles.settingLeft}>
                 <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
                 <Text style={styles.settingText}>Confidentialité</Text>
@@ -283,7 +281,10 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('HelpSupport')}
+            >
               <View style={styles.settingLeft}>
                 <Ionicons name="help-circle" size={24} color={colors.primary} />
                 <Text style={styles.settingText}>Aide & Support</Text>
@@ -291,7 +292,10 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('About')}
+            >
               <View style={styles.settingLeft}>
                 <Ionicons name="information-circle" size={24} color={colors.primary} />
                 <Text style={styles.settingText}>À propos</Text>

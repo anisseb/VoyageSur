@@ -69,10 +69,10 @@ export default function ResetPassword({ visible, onClose }: ResetPasswordProps) 
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
             <Text style={styles.title}>🔑 Réinitialiser le mot de passe</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <MaterialCommunityIcons name="close" size={20} color="#fff" />
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.description}>
@@ -135,21 +135,38 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 20,
+    position: 'relative',
   },
   closeButton: {
     position: 'absolute',
-    right: 0,
-    top: 0,
-    zIndex: 1,
-    padding: 5,
+    right: -15,
+    top: -15,
+    zIndex: 10,
+    padding: 8,
+    backgroundColor: '#444',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   title: {
     fontSize: 20,
     color: '#fff',
     fontWeight: 'bold',
-    flex: 1,
     textAlign: 'center',
+    flex: 1,
+    marginRight: 30,
   },
   description: {
     fontSize: 14,

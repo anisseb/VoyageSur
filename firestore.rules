@@ -39,5 +39,13 @@ service cloud.firestore {
     match /symptomes/{document} {
       allow read, write: if true; // Temporairement ouvert pour les tests
     }
+
+    match /fiches_urgence/{document} {
+      allow read, write: if true; // À restreindre en production
+    }
+
+    match /contact-us-app/{document} {
+      allow read, write: if true; // À restreindre en production
+    }
   }
 } 

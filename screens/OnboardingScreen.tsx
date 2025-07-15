@@ -29,6 +29,7 @@ export default function OnboardingScreen({ navigation, route }: OnboardingScreen
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
+    lastName: '',
     age: '',
     gender: '',
   });
@@ -46,6 +47,15 @@ export default function OnboardingScreen({ navigation, route }: OnboardingScreen
     },
     {
       id: 1,
+      title: 'Votre nom de famille',
+      subtitle: 'Quel est votre nom de famille ?',
+      icon: 'person',
+      field: 'lastName',
+      placeholder: 'Votre nom de famille',
+      type: 'text',
+    },
+    {
+      id: 2,
       title: 'Votre âge',
       subtitle: 'Cela nous aide à personnaliser vos recommandations',
       icon: 'calendar',
@@ -54,7 +64,7 @@ export default function OnboardingScreen({ navigation, route }: OnboardingScreen
       type: 'number',
     },
     {
-      id: 2,
+      id: 3,
       title: 'Votre sexe',
       subtitle: 'Pour des recommandations médicales adaptées',
       icon: 'male-female',
@@ -70,7 +80,7 @@ export default function OnboardingScreen({ navigation, route }: OnboardingScreen
     const value = formData[currentStepData.field as keyof typeof formData];
     
     if (!value || value.trim() === '') {
-      Alert.alert('Erreur', `Veuillez saisir votre ${currentStepData.field === 'firstName' ? 'prénom' : currentStepData.field === 'age' ? 'âge' : 'sexe'}`);
+      Alert.alert('Erreur', `Veuillez saisir votre ${currentStepData.field === 'firstName' ? 'prénom' : currentStepData.field === 'lastName' ? 'nom de famille' : currentStepData.field === 'age' ? 'âge' : 'sexe'}`);
       return false;
     }
 
@@ -107,6 +117,7 @@ export default function OnboardingScreen({ navigation, route }: OnboardingScreen
       // Mettre à jour le document utilisateur dans Firestore
       await updateDoc(doc(db, 'users', userId), {
         firstName: formData.firstName,
+        lastName: formData.lastName,
         age: parseInt(formData.age),
         gender: formData.gender,
         onboarding: true, // L'onboarding est terminé

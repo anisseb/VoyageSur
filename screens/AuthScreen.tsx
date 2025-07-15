@@ -27,7 +27,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { showErrorAlert, showSuccessAlert } from '../utils/alerts';
 import { Image } from 'expo-image';
 import { colors } from '../theme/colors';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -53,6 +53,8 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showReconnectButton, setShowReconnectButton] = useState(false);
   const auth = getAuth();
+  const insets = useSafeAreaInsets();
+
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -127,21 +129,24 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
 
   const configureGoogleSignIn = async () => {
     try {
+      console.log('Configuration Google Sign-In...');
+      console.log('Platform:', Platform.OS);
+      console.log('Web Client ID:', process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID);
+      console.log('iOS Client ID:', process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID);
+      
       GoogleSignin.configure({
-        webClientId: '632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u.apps.googleusercontent.com',
-        iosClientId: '632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u.apps.googleusercontent.com',
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
         offlineAccess: true,
       });
       
-      console.log('Google Sign In configuré');
+      console.log('Google Sign In configuré avec succès');
       setIsGoogleAuthAvailable(true);
     } catch (error) {
       console.error('Erreur lors de la configuration Google Sign In:', error);
       setIsGoogleAuthAvailable(false);
     }
   };
-
-
 
   const isPasswordValid = (pass: string) => {
     const hasMinLength = pass.length >= 8;
@@ -289,6 +294,24 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
     }
   };
 
+  const handleOnboardingRedirect = async (userId: string) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.onboarding === false) {
+          console.log('Redirection vers l\'onboarding pour l\'utilisateur:', userId);
+          navigation.navigate('Onboarding');
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de la vérification de l\'onboarding:', error);
+      return false;
+    }
+  };
+
   const handleAppleAuth = async () => {
     try {
       setIsLoading(true);
@@ -355,7 +378,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
         await saveAppleCredentials(userId, userEmail, displayName);
       }
       
-      // Navigation sera gérée automatiquement par AuthContext
+      // Vérifier si l'utilisateur doit être redirigé vers l'onboarding
+      const shouldRedirectToOnboarding = await handleOnboardingRedirect(userId);
+      if (!shouldRedirectToOnboarding) {
+        // Navigation sera gérée automatiquement par AuthContext
+        console.log('Utilisateur Apple connecté, navigation normale');
+      }
     } catch (error: any) {
       console.error('Erreur lors de l\'authentification Apple:', error);
       
@@ -463,10 +491,14 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
 
   const handleGoogleAuth = async () => {
     try {
+      console.log('=== Début de l\'authentification Google ===');
+      console.log('Platform:', Platform.OS);
       setIsLoading(true);
       
       if (Platform.OS === 'android') {
+        console.log('Vérification Google Play Services...');
         const hasPlayServices = await GoogleSignin.hasPlayServices();
+        console.log('Google Play Services disponible:', hasPlayServices);
         if (!hasPlayServices) {
           showErrorAlert('Erreur', 'Google Play Services n\'est pas disponible');
           return;
@@ -493,6 +525,11 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           showErrorAlert(
             'Erreur de configuration', 
             'Google Sign-In n\'est pas correctement configuré. Veuillez vérifier la configuration des URL schemes.'
+          );
+        } else if (signInError.code === 'DEVELOPER_ERROR') {
+          showErrorAlert(
+            'Erreur de configuration Android', 
+            'Erreur de configuration Google Sign-In sur Android. Vérifiez les certificats SHA-1 et les clients OAuth.'
           );
         } else if (signInError.code === 'SIGN_IN_CANCELLED' || 
                    signInError.code === 'SIGN_IN_REQUIRED' ||
@@ -555,7 +592,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
         await saveGoogleCredentials(userId, userEmail, displayName);
       }
       
-      // Navigation sera gérée automatiquement par AuthContext
+      // Vérifier si l'utilisateur doit être redirigé vers l'onboarding
+      const shouldRedirectToOnboarding = await handleOnboardingRedirect(userId);
+      if (!shouldRedirectToOnboarding) {
+        // Navigation sera gérée automatiquement par AuthContext
+        console.log('Utilisateur Google connecté, navigation normale');
+      }
     } catch (error: any) {
       console.error('Erreur lors de l\'authentification Google:', error);
       
@@ -566,6 +608,11 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           error.message?.includes('canceled')) {
         console.log('Authentification Google annulée par l\'utilisateur');
         return;
+      } else if (error.code === 'DEVELOPER_ERROR') {
+        showErrorAlert(
+          'Erreur de configuration Android', 
+          'Erreur de configuration Google Sign-In sur Android. Vérifiez les certificats SHA-1 et les clients OAuth.'
+        );
       } else if (error.code === 'auth/operation-not-allowed') {
         showErrorAlert('Erreur', 'Google Authentication n\'est pas activé dans Firebase.');
       } else if (error.code === 'auth/invalid-credential') {
@@ -581,7 +628,7 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top + 20 }]}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Image source={require('../assets/images/voyage-sur-logo.png')} style={styles.logo} contentFit="cover" cachePolicy="memory-disk" />
@@ -772,38 +819,6 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
               </Text>
             </TouchableOpacity>
 
-            {showReconnectButton && (
-              <TouchableOpacity 
-                style={styles.reconnectButton} 
-                onPress={async () => {
-                  setIsLoading(true);
-                  try {
-                    const storedEmail = await SecureStore.getItemAsync('userEmail');
-                    const storedPassword = await SecureStore.getItemAsync('userPassword');
-                    if (storedEmail && storedPassword) {
-                      await signInWithEmailAndPassword(auth, storedEmail, storedPassword);
-                      setShowReconnectButton(false);
-                    }
-                  } catch (error) {
-                    console.error('Erreur lors de la reconnexion:', error);
-                    showErrorAlert('Erreur', 'Impossible de se reconnecter automatiquement');
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-                disabled={isLoading}
-              >
-                <MaterialCommunityIcons 
-                  name="refresh" 
-                  size={20} 
-                  color="#60a5fa" 
-                  style={styles.buttonIcon}
-                />
-                <Text style={styles.reconnectButtonText}>
-                  🔄 Se reconnecter automatiquement
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
         </View>
       </SafeAreaView>
@@ -823,10 +838,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   header: {
-    flex: 0.25,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.surface,
@@ -851,7 +867,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   formContainer: {
-    flex: 1,
     backgroundColor: colors.surface,
     padding: 15,
     marginHorizontal: 20,
@@ -983,7 +998,7 @@ const styles = StyleSheet.create({
   switchText: {
     color: colors.primary,
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
   },
   orText: {

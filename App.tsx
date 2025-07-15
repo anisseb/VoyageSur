@@ -31,6 +31,10 @@ import ChecklistScreen from './screens/ChecklistScreen';
 import VaccinesScreen from './screens/VaccinesScreen';
 import MedicinesScreen from './screens/MedicinesScreen';
 import EmergencyScreen from './screens/EmergencyScreen';
+import PrivacyScreen from './screens/PrivacyScreen';
+import AboutScreen from './screens/AboutScreen';
+import HelpSupportScreen from './screens/HelpSupportScreen';
+import ContactFormScreen from './screens/ContactFormScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -105,6 +109,49 @@ function TripStack() {
   );
 }
 
+// Stack pour le profil
+function ProfileStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.primary,
+        },
+        headerTintColor: colors.white,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="ProfileMain" 
+        component={ProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Privacy" 
+        component={PrivacyScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="About" 
+        component={AboutScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="HelpSupport" 
+        component={HelpSupportScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="ContactForm" 
+        component={ContactFormScreen} 
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 // Navigation principale avec tabs
 function TabNavigator() {
   return (
@@ -139,7 +186,7 @@ function TabNavigator() {
       />
       <Tab.Screen 
         name="Profile" 
-        component={ProfileScreen} 
+        component={ProfileStack} 
         options={{ title: 'Profil' }}
       />
     </Tab.Navigator>
