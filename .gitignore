@@ -48,4 +48,4 @@ app-example
 # Expo
 .expo
 dist/
-web-build/
+web-build/.env
