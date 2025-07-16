@@ -44,22 +44,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     },
   });
 
-  const handleUpgradeToPremium = () => {
-    Alert.alert(
-      'Passer à Premium',
-      'Voulez-vous passer à la version premium pour 2,99€/mois ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Upgrader', 
-          onPress: () => {
-            setIsPremium(true);
-            Alert.alert('Succès', 'Vous êtes maintenant premium !');
-          }
-        },
-      ]
-    );
-  };
+
 
   const handleSaveProfile = async () => {
     try {
@@ -210,11 +195,19 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 <View style={styles.premiumFeatures}>
                   <View style={styles.featureItem}>
                     <Ionicons name="checkmark-circle" size={20} color={colors.white} />
-                    <Text style={styles.featureText}>Voyages illimités</Text>
+                    <Text style={styles.featureText}>Création de voyage illimité ( recommandations de vaccins, gestions des symptômes et traitement, contacts d'urgence, checklist de préparation etc...)</Text>
                   </View>
                   <View style={styles.featureItem}>
                     <Ionicons name="checkmark-circle" size={20} color={colors.white} />
-                    <Text style={styles.featureText}>Profils famille sauvegardés</Text>
+                    <Text style={styles.featureText}>Accès aux fiches urgences de premier secours</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="checkmark-circle" size={20} color={colors.white} />
+                    <Text style={styles.featureText}>Accès à la météo et aux conseils météorologique local en fonction des dates du voyage sélectionné</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="checkmark-circle" size={20} color={colors.white} />
+                    <Text style={styles.featureText}>Accès aux recommandations IA ( conseils culturels, conseils pour la valise, coutumes locales etc ..)</Text>
                   </View>
                   <View style={styles.featureItem}>
                     <Ionicons name="checkmark-circle" size={20} color={colors.white} />
@@ -223,9 +216,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 </View>
                 <TouchableOpacity
                   style={styles.upgradeButton}
-                  onPress={handleUpgradeToPremium}
+                  onPress={() => navigation.navigate('Subscription')}
                 >
-                  <Text style={styles.upgradeButtonText}>2,99€/mois</Text>
+                  <Text style={styles.upgradeButtonText}>Voir les offres</Text>
                 </TouchableOpacity>
               </LinearGradient>
             </View>
@@ -270,7 +263,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.settingItem}
               onPress={() => navigation.navigate('Privacy')}
             >

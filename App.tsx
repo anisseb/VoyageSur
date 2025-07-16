@@ -35,6 +35,7 @@ import PrivacyScreen from './screens/PrivacyScreen';
 import AboutScreen from './screens/AboutScreen';
 import HelpSupportScreen from './screens/HelpSupportScreen';
 import ContactFormScreen from './screens/ContactFormScreen';
+import SubscriptionScreen from './screens/SubscriptionScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -105,6 +106,12 @@ function TripStack() {
         component={EmergencyScreen} 
         options={{ title: 'Contacts d\'Urgence' }}
       />
+      <Stack.Screen 
+        name="Subscription" 
+        component={SubscriptionScreen} 
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 }
@@ -146,6 +153,11 @@ function ProfileStack() {
       <Stack.Screen 
         name="ContactForm" 
         component={ContactFormScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Subscription" 
+        component={SubscriptionScreen} 
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

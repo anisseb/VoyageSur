@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
 import { TravelPlan } from '../types';
 import { travelPlanService, cityService } from '../services/firebaseService';
+import { purchaseService } from '../services/purchaseService';
 import { useAuth } from '../contexts/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -27,14 +28,31 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [pastTrips, setPastTrips] = useState<TravelPlan[]>([]);
   const [cityData, setCityData] = useState<{ [key: string]: any }>({});
   const [loading, setLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  const [hasFreeTripAccess, setHasFreeTripAccess] = useState(true);
   const insets = useSafeAreaInsets();
 
   // Recharger les voyages quand l'écran devient actif
   useFocusEffect(
     React.useCallback(() => {
       loadTrips();
+      checkSubscriptionStatus();
     }, [])
   );
+
+  // Vérifier le statut d'abonnement
+  const checkSubscriptionStatus = async () => {
+    try {
+      const [premium, freeTrip] = await Promise.all([
+        purchaseService.isPremium(),
+        purchaseService.hasFreeTripAccess()
+      ]);
+      setIsPremium(premium);
+      setHasFreeTripAccess(freeTrip);
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
 
   const loadTrips = async () => {
     try {
@@ -136,6 +154,40 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.newTripText}>Nouveau Voyage</Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* Message sur le voyage gratuit et options d'achat */}
+        {!isPremium && hasFreeTripAccess && (
+          <View style={styles.section}>
+            <View style={styles.freeTripCard}>
+              <View style={styles.freeTripHeader}>
+                <Ionicons name="gift" size={24} color={colors.success} />
+                <Text style={styles.freeTripTitle}>Voyage Gratuit Disponible</Text>
+              </View>
+              <Text style={styles.freeTripDescription}>
+                Vous avez accès à un voyage gratuit avec toutes les fonctionnalités de base. 
+                Pour plus de voyages, choisissez une option ci-dessous.
+              </Text>
+              <View style={styles.freeTripOptions}>
+                <TouchableOpacity
+                  style={styles.optionButton}
+                  onPress={() => navigation.navigate('Subscription')}
+                >
+                  <Ionicons name="star" size={20} color={colors.primary} />
+                  <Text style={styles.optionButtonText}>Passer à Premium</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.optionButton, styles.secondaryOption]}
+                  onPress={() => navigation.navigate('Subscription')}
+                >
+                  <Ionicons name="airplane" size={20} color={colors.info} />
+                  <Text style={[styles.optionButtonText, styles.secondaryOptionText]}>
+                    Acheter un voyage
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Section Voyages Actifs */}
         <View style={styles.section}>
@@ -486,5 +538,63 @@ const styles = StyleSheet.create({
   },
   pastTripText: {
     color: colors.text.secondary,
+  },
+  // Styles pour le message de voyage gratuit
+  freeTripCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    elevation: 4,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
+  },
+  freeTripHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  freeTripTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginLeft: 8,
+  },
+  freeTripDescription: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  freeTripOptions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  optionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  optionButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 6,
+  },
+  secondaryOption: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.info,
+  },
+  secondaryOptionText: {
+    color: colors.info,
   },
 }); 
