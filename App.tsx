@@ -36,6 +36,8 @@ import AboutScreen from './screens/AboutScreen';
 import HelpSupportScreen from './screens/HelpSupportScreen';
 import ContactFormScreen from './screens/ContactFormScreen';
 import SubscriptionScreen from './screens/SubscriptionScreen';
+import EmergencyCardsScreen from './screens/EmergencyCardsScreen';
+import EmergencyCardDetailScreen from './screens/EmergencyCardDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -73,7 +75,13 @@ function TripStack() {
       <Stack.Screen 
         name="NewTrip" 
         component={NewTripScreen} 
-        options={{ title: 'Nouveau Voyage' }}
+        options={{ 
+          title: 'Nouveau Voyage',
+          headerBackTitle: '',
+          headerLeftContainerStyle: {
+            paddingLeft: 10
+          }
+        }}
       />
             <Stack.Screen 
         name="TripDetails" 
@@ -109,6 +117,16 @@ function TripStack() {
       <Stack.Screen 
         name="Subscription" 
         component={SubscriptionScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EmergencyCards" 
+        component={EmergencyCardsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EmergencyCardDetail" 
+        component={EmergencyCardDetailScreen} 
         options={{ headerShown: false }}
       />
 
@@ -158,6 +176,16 @@ function ProfileStack() {
       <Stack.Screen 
         name="Subscription" 
         component={SubscriptionScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EmergencyCards" 
+        component={EmergencyCardsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EmergencyCardDetail" 
+        component={EmergencyCardDetailScreen} 
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

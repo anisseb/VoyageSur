@@ -8,12 +8,13 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { purchaseService, SubscriptionPlan, SinglePurchase } from '../services/purchaseService';
+import { purchaseService } from '../services/purchaseService';
 
 interface SubscriptionScreenProps {
   navigation: any;
@@ -23,77 +24,78 @@ export default function SubscriptionScreen({ navigation }: SubscriptionScreenPro
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
-  const [singlePurchases, setSinglePurchases] = useState<SinglePurchase[]>([]);
+  const [offerings, setOfferings] = useState<any>(null);
 
   useEffect(() => {
-    loadOfferings();
+    const fetchOfferings = async () => {
+      try {
+        const res = await purchaseService.getOfferings();
+        setOfferings(res);
+      } catch (e) {
+        console.error('Error loading offerings:', e);
+        Alert.alert('Erreur ❌', "Impossible de charger les offres d'abonnement. 😕");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOfferings();
   }, []);
 
-  const loadOfferings = async () => {
-    try {
-      setLoading(true);
-      const [plans, purchases] = await Promise.all([
-        purchaseService.getSubscriptionPlans(),
-        purchaseService.getSinglePurchases()
-      ]);
-      setSubscriptionPlans(plans);
-      setSinglePurchases(purchases);
-    } catch (error) {
-      console.error('Error loading offerings:', error);
-      Alert.alert('Erreur', 'Impossible de charger les offres. Veuillez réessayer.');
-    } finally {
-      setLoading(false);
+  const handlePurchase = async (type: 'subscription' | 'single_trip', mode?: 'mois' | 'an') => {
+    if (!offerings) {
+      Alert.alert('Erreur ❌', 'Aucune offre disponible. 😕');
+      return;
     }
-  };
 
-  const handlePurchaseSubscription = async (plan: SubscriptionPlan) => {
-    setPurchasing(plan.id);
-    try {
-      const success = await purchaseService.purchaseSubscription(plan.id);
-      if (success) {
-        Alert.alert(
-          'Succès !',
-          'Votre abonnement a été activé avec succès !',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+    let packageId = '';
+    const platform = Platform.OS as 'ios' | 'android';
+
+    if (type === 'subscription') {
+      if (platform === 'ios') {
+        packageId = mode === 'mois' ? 'voyage.sur.monthly' : 'voyage.sur.premium.years';
       } else {
-        Alert.alert('Erreur', 'L\'achat a échoué. Veuillez réessayer.');
+        packageId = mode === 'mois' ? 'voyage-sur-premium-monthly' : 'voyage-sur-premium-years';
       }
-    } catch (error) {
-      console.error('Error purchasing subscription:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'achat.');
-    } finally {
-      setPurchasing(null);
+    } else {
+      if (platform === 'ios') {
+        packageId = 'voyage.sur.check.sante.unique';
+      } else {
+        packageId = 'voyage.sur.check.sante.unique';
+      }
     }
-  };
 
-  const handlePurchaseSingleTrip = async (purchase: SinglePurchase) => {
-    setPurchasing(purchase.id);
+    const selectedPackage = offerings.availablePackages.find((p: any) => p.product.identifier === packageId);
+    if (!selectedPackage) {
+      Alert.alert('Erreur ❌', `Offre ${packageId} non trouvée. 😕`);
+      return;
+    }
+
+    setPurchasing(packageId);
     try {
-      const success = await purchaseService.purchaseSingleTrip(purchase.id);
+      const success = type === 'subscription' 
+        ? await purchaseService.purchaseSubscription(selectedPackage.identifier)
+        : await purchaseService.purchaseSingleTrip(selectedPackage.identifier);
+
       if (success) {
-        Alert.alert(
-          'Succès !',
-          'Votre voyage à l\'unité a été acheté avec succès !',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+        Alert.alert('Merci ! 🎉', 'Achat effectué avec succès ! 🚀', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
       } else {
-        Alert.alert('Erreur', 'L\'achat a échoué. Veuillez réessayer.');
+        Alert.alert('Erreur ❌', 'Achat effectué mais accès non activé. Veuillez contacter le support. 🛠️');
       }
-    } catch (error) {
-      console.error('Error purchasing single trip:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'achat.');
+    } catch (e: any) {
+      // RevenueCat : PurchaseCancelledError ou userCancelled
+      if (
+        e.code === 'PurchaseCancelledError' ||
+        e.code === 'USER_CANCELED' ||
+        e.code === 'PurchaseCancelledError' ||
+        e.userCancelled === true ||
+        (typeof e.message === 'string' && e.message.toLowerCase().includes('cancel'))
+      ) {
+        // Achat annulé par l'utilisateur : on ne fait rien
+        return;
+      }
+      Alert.alert('Erreur ❌', 'Achat impossible : ' + e.message + ' 😢');
     } finally {
       setPurchasing(null);
     }
@@ -103,16 +105,9 @@ export default function SubscriptionScreen({ navigation }: SubscriptionScreenPro
     try {
       const success = await purchaseService.restorePurchases();
       if (success) {
-        Alert.alert(
-          'Succès !',
-          'Vos achats ont été restaurés avec succès !',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+        Alert.alert('Succès ! 🎉', 'Vos achats ont été restaurés avec succès ! 🚀', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
       } else {
         Alert.alert('Information', 'Aucun achat à restaurer trouvé.');
       }
@@ -164,7 +159,7 @@ export default function SubscriptionScreen({ navigation }: SubscriptionScreenPro
               <Text style={styles.freeTitle}>Voyage Gratuit</Text>
             </View>
             <Text style={styles.freeDescription}>
-              Créez un voyage gratuit avec toutes les fonctionnalités de base
+              Le premier check de voyage est gratuit avec toutes les fonctionnalités Premium
             </Text>
             <View style={styles.freeFeatures}>
               <View style={styles.featureItem}>
@@ -183,102 +178,187 @@ export default function SubscriptionScreen({ navigation }: SubscriptionScreenPro
           </View>
         </View>
 
-        {/* Section Achats à l'unité */}
-        {singlePurchases.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Voyage à l'unité</Text>
-            {singlePurchases.map((purchase) => (
+        {/* Section Voyage à l'unité */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Voyage à l'unité</Text>
+          <View style={styles.purchaseCard}>
+            <View style={styles.purchaseHeader}>
+              <Ionicons name="airplane" size={24} color={colors.primary} />
+              <Text style={styles.purchaseTitle}>Voyage à l'unité</Text>
+            </View>
+            <Text style={styles.purchaseDescription}>
+              Un voyage complet avec toutes les fonctionnalités premium
+            </Text>
+            <View style={styles.purchaseFooter}>
+              <Text style={styles.purchasePrice}>
+                {offerings ? (
+                  (() => {
+                    const id = Platform.OS === 'ios' ? 'voyage.sur.check.sante.unique' : 'voyage.sur.check.sante.unique';
+                    const pkg = offerings.availablePackages.find((p: any) => p.product.identifier === id);
+                    return pkg ? pkg.product.priceString : '4,99€';
+                  })()
+                ) : '4,99€'}
+              </Text>
               <TouchableOpacity
-                key={purchase.id}
-                style={styles.purchaseCard}
-                onPress={() => handlePurchaseSingleTrip(purchase)}
-                disabled={purchasing === purchase.id}
+                style={[styles.purchaseButton, purchasing === 'voyage.sur.check.sante.unique' && styles.purchaseButtonDisabled]}
+                onPress={() => handlePurchase('single_trip')}
+                disabled={purchasing !== null}
               >
-                <View style={styles.purchaseHeader}>
-                  <Ionicons name="airplane" size={24} color={colors.primary} />
-                  <Text style={styles.purchaseTitle}>{purchase.title}</Text>
-                </View>
-                <Text style={styles.purchaseDescription}>{purchase.description}</Text>
-                <View style={styles.purchaseFooter}>
-                  <Text style={styles.purchasePrice}>{purchase.price}</Text>
-                  <TouchableOpacity
-                    style={[styles.purchaseButton, purchasing === purchase.id && styles.purchaseButtonDisabled]}
-                    disabled={purchasing === purchase.id}
-                  >
-                    {purchasing === purchase.id ? (
-                      <ActivityIndicator size="small" color={colors.white} />
-                    ) : (
-                      <Text style={styles.purchaseButtonText}>Acheter</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
+                {purchasing === 'voyage.sur.check.sante.unique' ? (
+                  <ActivityIndicator size="small" color={colors.white} />
+                ) : (
+                  <Text style={styles.purchaseButtonText}>Acheter</Text>
+                )}
               </TouchableOpacity>
-            ))}
+            </View>
           </View>
-        )}
+        </View>
 
         {/* Section Abonnements */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Abonnements Premium</Text>
-          {subscriptionPlans.map((plan) => (
-            <TouchableOpacity
-              key={plan.id}
-              style={styles.subscriptionCard}
-              onPress={() => handlePurchaseSubscription(plan)}
-              disabled={purchasing === plan.id}
+          
+          {/* Abonnement Mensuel */}
+          <View style={styles.subscriptionCard}>
+            <LinearGradient
+              colors={[colors.primary, colors.secondary]}
+              style={styles.subscriptionGradient}
             >
-              <LinearGradient
-                colors={[colors.primary, colors.secondary]}
-                style={styles.subscriptionGradient}
-              >
-                <View style={styles.subscriptionHeader}>
-                  <Ionicons name="star" size={24} color={colors.white} />
-                  <Text style={styles.subscriptionTitle}>{plan.title}</Text>
-                  {plan.savings && (
-                    <View style={styles.savingsBadge}>
-                      <Text style={styles.savingsText}>{plan.savings}</Text>
-                    </View>
+              <View style={styles.subscriptionHeader}>
+                <Ionicons name="star" size={24} color={colors.white} />
+                <Text style={styles.subscriptionTitle}>Abonnement Mensuel</Text>
+              </View>
+              <Text style={styles.subscriptionDescription}>
+                Accès premium illimité pour tous vos voyages
+              </Text>
+              <View style={styles.subscriptionFeatures}>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Voyages illimités</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Fiches de premiers secours</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Météo et conseils locaux</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Recommandations IA</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Notifications avancées</Text>
+                </View>
+              </View>
+              <View style={styles.subscriptionFooter}>
+                <Text style={styles.subscriptionPrice}>
+                  {offerings ? (
+                    (() => {
+                      const id = Platform.OS === 'ios' ? 'voyage.sur.monthly' : 'voyage-sur-premium-monthly';
+                      const pkg = offerings.availablePackages.find((p: any) => p.product.identifier === id);
+                      return pkg ? pkg.product.priceString : '9,99€ / mois';
+                    })()
+                  ) : '9,99€ / mois'}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.subscriptionButton, purchasing === 'voyage.sur.monthly' && styles.subscriptionButtonDisabled]}
+                  onPress={() => handlePurchase('subscription', 'mois')}
+                  disabled={purchasing !== null}
+                >
+                  {purchasing === 'voyage.sur.monthly' ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Text style={styles.subscriptionButtonText}>S'abonner</Text>
                   )}
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </View>
+
+          {/* Abonnement Annuel */}
+          <View style={styles.subscriptionCard}>
+            <LinearGradient
+              colors={[colors.primary, colors.secondary]}
+              style={styles.subscriptionGradient}
+            >
+              <View style={styles.subscriptionHeader}>
+                <Ionicons name="star" size={24} color={colors.white} />
+                <Text style={styles.subscriptionTitle}>Abonnement Annuel</Text>
+                  <View style={styles.savingsBadge}>
+                   <Text style={styles.savingsText}>Économisez 33%</Text>
+                 </View>
+              </View>
+              <Text style={styles.subscriptionDescription}>
+                Accès premium illimité pour tous vos voyages (économisez sur l'année)
+              </Text>
+              <View style={styles.subscriptionFeatures}>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Voyages illimités</Text>
                 </View>
-                <Text style={styles.subscriptionDescription}>{plan.description}</Text>
-                <View style={styles.subscriptionFeatures}>
-                  <View style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-                    <Text style={styles.featureText}>Voyages illimités</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-                    <Text style={styles.featureText}>Fiches de premiers secours</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-                    <Text style={styles.featureText}>Météo et conseils locaux</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-                    <Text style={styles.featureText}>Recommandations IA</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-                    <Text style={styles.featureText}>Notifications avancées</Text>
-                  </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Fiches de premiers secours</Text>
                 </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Météo et conseils locaux</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Recommandations IA</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                  <Text style={styles.featureText}>Notifications avancées</Text>
+                </View>
+              </View>
                 <View style={styles.subscriptionFooter}>
-                  <Text style={styles.subscriptionPrice}>{plan.price}</Text>
-                  <TouchableOpacity
-                    style={[styles.subscriptionButton, purchasing === plan.id && styles.subscriptionButtonDisabled]}
-                    disabled={purchasing === plan.id}
-                  >
-                    {purchasing === plan.id ? (
-                      <ActivityIndicator size="small" color={colors.primary} />
-                    ) : (
-                      <Text style={styles.subscriptionButtonText}>S'abonner</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
+                 <View style={styles.priceContainer}>
+                   <Text style={styles.subscriptionPrice}>
+                     {offerings ? (
+                       (() => {
+                         const id = Platform.OS === 'ios' ? 'voyage.sur.premium.years' : 'voyage-sur-premium-years';
+                         const pkg = offerings.availablePackages.find((p: any) => p.product.identifier === id);
+                         if (pkg) {
+                           const prixMois = pkg.product.pricePerMonthString || '';
+                           const prixAnnee = pkg.product.pricePerYearString || '';
+                           if (prixMois && prixAnnee) {
+                             return (
+                               <Text>
+                                 <Text style={styles.monthlyPrice}>{prixMois} / mois</Text>
+                                 <Text style={styles.yearlyPrice}> ({prixAnnee} / an)</Text>
+                               </Text>
+                             );
+                           }
+                           return <Text style={styles.yearlyPrice}>{prixAnnee || pkg.product.priceString}</Text>;
+                         }
+                         return <Text style={styles.yearlyPrice}>39,99€ / an</Text>;
+                       })()
+                     ) : (
+                       <Text style={styles.yearlyPrice}>39,99€ / an</Text>
+                     )}
+                   </Text>
+                 </View>
+               </View>
+               <View style={styles.buttonContainer}>
+                 <TouchableOpacity
+                   style={[styles.subscriptionButton, purchasing === 'voyage.sur.premium.years' && styles.subscriptionButtonDisabled]}
+                   onPress={() => handlePurchase('subscription', 'an')}
+                   disabled={purchasing !== null}
+                 >
+                   {purchasing === 'voyage.sur.premium.years' ? (
+                     <ActivityIndicator size="small" color={colors.primary} />
+                   ) : (
+                     <Text style={styles.subscriptionButtonText}>S'abonner</Text>
+                   )}
+                 </TouchableOpacity>
+               </View>
+            </LinearGradient>
+          </View>
         </View>
 
         {/* Section Restaurer les achats */}
@@ -364,7 +444,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text.primary,
     marginBottom: 16,
-    textAlign: 'center',
   },
   freeCard: {
     backgroundColor: colors.white,
@@ -409,7 +488,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
     elevation: 2,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
@@ -473,7 +551,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 10,
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   subscriptionTitle: {
     fontSize: 20,
@@ -507,10 +585,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  priceContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  buttonContainer: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
   subscriptionPrice: {
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.white,
+  },
+  monthlyPrice: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  yearlyPrice: {
+    fontSize: 21,
+    fontWeight: 'bold',
+    color: '#FFD700',
   },
   subscriptionButton: {
     backgroundColor: colors.white,
@@ -568,5 +664,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text.secondary,
     lineHeight: 20,
+  },
+  debugCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.info + '10',
+    borderLeftWidth: 4,
+    borderLeftColor: colors.info,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'flex-start',
+  },
+  debugContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  debugTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    lineHeight: 16,
+    marginBottom: 4,
   },
 }); 

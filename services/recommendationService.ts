@@ -14,7 +14,6 @@ export interface RecommendationResponse {
   city: string;
   country: string;
   generalAdvice: string;
-  healthTips: string;
   safetyTips: string;
   culturalTips: string;
   packingTips: string;
@@ -86,7 +85,6 @@ Génère une réponse JSON structurée avec les sections suivantes:
 
 {
   "generalAdvice": "Conseils généraux pour ce voyage",
-  "healthTips": "Conseils de santé spécifiques à cette destination",
   "safetyTips": "Conseils de sécurité pour ${request.city}",
   "culturalTips": "Conseils culturels et bonnes pratiques locales",
   "packingTips": "Conseils pour la valise selon la durée et le type de voyage",
@@ -163,7 +161,6 @@ Sois précis, pratique et adapté au contexte du voyage. Inclus des conseils sp�
           city: '',
           country: '',
           generalAdvice: content,
-          healthTips: 'Recommandations de santé génériques',
           safetyTips: 'Conseils de sécurité génériques',
           culturalTips: 'Conseils culturels génériques',
           packingTips: 'Conseils de valise génériques',
@@ -226,7 +223,6 @@ Sois précis, pratique et adapté au contexte du voyage. Inclus des conseils sp�
         city: request.city,
         country: request.country,
         generalAdvice: 'Consultez votre médecin avant le départ et vérifiez les recommandations sanitaires pour cette destination.',
-        healthTips: 'Emportez une trousse de premiers soins et vos médicaments habituels.',
         safetyTips: 'Informez-vous sur la situation locale et gardez vos documents en sécurité.',
         culturalTips: 'Respectez les coutumes locales et habillez-vous de manière appropriée.',
         packingTips: 'Adaptez votre valise à la durée du séjour et au climat local.',

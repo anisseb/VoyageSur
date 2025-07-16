@@ -203,6 +203,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           gender: '',
           isPremium: false,
           onboarding: false,
+          'achat-unique': {
+            productId: 'free_trip',
+            quantity: 1,
+            purchaseDate: new Date().toISOString(),
+            platform: Platform.OS
+          },
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -358,6 +364,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           gender: '',
           isPremium: false,
           onboarding: false,
+          'achat-unique': {
+            productId: 'free_trip',
+            quantity: 1,
+            purchaseDate: new Date().toISOString(),
+            platform: Platform.OS
+          },
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -454,6 +466,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           gender: '',
           isPremium: false,
           onboarding: false,
+          'achat-unique': {
+            productId: 'free_trip',
+            quantity: 1,
+            purchaseDate: new Date().toISOString(),
+            platform: Platform.OS
+          },
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -578,6 +596,12 @@ export default function AuthScreen({ navigation }: AuthScreenProps) {
           gender: '',
           isPremium: false,
           onboarding: false,
+          'achat-unique': {
+            productId: 'free_trip',
+            quantity: 1,
+            purchaseDate: new Date().toISOString(),
+            platform: Platform.OS
+          },
           createdAt: new Date(),
           updatedAt: new Date(),
         });

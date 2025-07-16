@@ -12,11 +12,13 @@ import {
   Modal,
   FlatList,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors } from '../theme/colors';
 import { travelPlanService, countryService, cityService } from '../services/firebaseService';
+import { purchaseService } from '../services/purchaseService';
 import { useAuth } from '../contexts/AuthContext';
 
 interface NewTripScreenProps {
@@ -50,9 +52,11 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
 
   const [loading, setLoading] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
+  const [filteredCountries, setFilteredCountries] = useState<Country[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [loadingCities, setLoadingCities] = useState(false);
+  const [countrySearchText, setCountrySearchText] = useState('');
 
   // États pour les modals
   const [showCountryModal, setShowCountryModal] = useState(false);
@@ -94,11 +98,26 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
     }
   }, [formData.countryId]);
 
+  // Filtrer les pays quand le texte de recherche change
+  useEffect(() => {
+    if (countrySearchText.trim() === '') {
+      setFilteredCountries(countries);
+    } else {
+      const filtered = countries.filter(country =>
+        country.name.toLowerCase().includes(countrySearchText.toLowerCase())
+      );
+      setFilteredCountries(filtered);
+    }
+  }, [countrySearchText, countries]);
+
   const loadCountries = async () => {
     try {
       setLoadingCountries(true);
       const countriesData = await countryService.getAll();
-      setCountries(countriesData);
+      // Trier les pays par ordre alphabétique
+      const sortedCountries = countriesData.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+      setCountries(sortedCountries);
+      setFilteredCountries(sortedCountries);
     } catch (error) {
       console.error('Erreur lors du chargement des pays:', error);
       Alert.alert('Erreur', 'Impossible de charger les pays. Veuillez réessayer.');
@@ -136,6 +155,7 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
       cityName: '',
     }));
     setShowCountryModal(false);
+    setCountrySearchText(''); // Réinitialiser la recherche
   };
 
   const handleCitySelect = (city: City) => {
@@ -235,6 +255,13 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
       };
 
       const tripId = await travelPlanService.create(newTrip);
+      
+      // Décrémenter la quantité d'achat unique si l'utilisateur n'est pas premium
+      const isPremium = await purchaseService.isPremium();
+      if (!isPremium) {
+        await purchaseService.decrementSingleTripQuantity();
+      }
+      
       Alert.alert(
         'Succès',
         'Voyage créé avec succès !',
@@ -269,7 +296,7 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.title}>Nouveau Voyage</Text>
+          <Text style={styles.title}>Check santé de voyage</Text>
           <Text style={styles.subtitle}>
             Remplissez les informations de votre voyage pour acceder a votre plan de santé
           </Text>
@@ -423,16 +450,40 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
         transparent={true}
         onRequestClose={() => setShowCountryModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Sélectionner un pays</Text>
-              <TouchableOpacity onPress={() => setShowCountryModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowCountryModal(false);
+                setCountrySearchText(''); // Réinitialiser la recherche
+              }}>
                 <Ionicons name="close" size={24} color={colors.text.primary} />
               </TouchableOpacity>
             </View>
+            
+            {/* Champ de recherche */}
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Rechercher un pays..."
+                value={countrySearchText}
+                onChangeText={setCountrySearchText}
+                placeholderTextColor={colors.text.secondary}
+              />
+              {countrySearchText.length > 0 && (
+                <TouchableOpacity onPress={() => setCountrySearchText('')}>
+                  <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+
             <FlatList
-              data={countries}
+              data={filteredCountries}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => renderModalItem({
                 item,
@@ -440,9 +491,11 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
                 isSelected: formData.countryId === item.id
               })}
               style={styles.modalList}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             />
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modal Ville */}
@@ -673,8 +726,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: colors.white,
     borderRadius: 10,
-    width: '80%',
-    maxHeight: '90%',
+    width: '90%',
+    maxHeight: '80%',
     elevation: 5,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
@@ -694,8 +747,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text.primary,
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.gray[50],
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text.primary,
+    paddingVertical: 8,
+  },
   modalList: {
-    maxHeight: '90%',
+    maxHeight: 300,
+    minHeight: 100,
   },
   modalItem: {
     flexDirection: 'row',

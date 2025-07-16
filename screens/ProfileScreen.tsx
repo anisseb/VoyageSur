@@ -225,30 +225,20 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           </View>
         )}
 
-        {/* Section Statistiques */}
+        {/* Section Accès rapide */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mes Statistiques</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Ionicons name="airplane" size={24} color={colors.primary} />
-              <Text style={styles.statNumber}>3</Text>
-              <Text style={styles.statLabel}>Voyages</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="medical" size={24} color={colors.vaccine} />
-              <Text style={styles.statNumber}>8</Text>
-              <Text style={styles.statLabel}>Vaccins</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Tâches</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="call" size={24} color={colors.emergency} />
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Contacts</Text>
-            </View>
+          <Text style={styles.sectionTitle}>Accès rapide</Text>
+          <View style={styles.settingsList}>
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('EmergencyCards')}
+            >
+              <View style={styles.settingLeft}>
+                <Ionicons name="medical" size={24} color={colors.primary} />
+                <Text style={styles.settingText}>Fiches d'urgence</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+            </TouchableOpacity>
           </View>
         </View>
 

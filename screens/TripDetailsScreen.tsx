@@ -176,8 +176,16 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
 
   useEffect(() => {
     if (trip && trip.city) {
-      loadWeatherData();
-      loadRecommendationData();
+      // Vérifier si le voyage est terminé
+      const isTripCompleted = new Date() > trip.endDate;
+      
+      // Ne charger les services IA que si le voyage n'est pas terminé
+      if (!isTripCompleted) {
+        loadWeatherData();
+        loadRecommendationData();
+      } else {
+        console.log('Voyage terminé - services IA non actualisés');
+      }
     }
   }, [trip]);
 
@@ -616,30 +624,6 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
                     )}
                   </View>
 
-                  {/* Conseils de santé */}
-                  <View style={styles.infoCard}>
-                    <TouchableOpacity
-                      style={styles.recommendationHeader}
-                      onPress={() => toggleRecommendationExpansion('health')}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.recommendationHeaderContent}>
-                        <Ionicons name="medical" size={20} color={colors.medicine} />
-                        <Text style={styles.infoTitle}>Conseils de santé</Text>
-                      </View>
-                      <Ionicons 
-                        name={expandedRecommendations['health'] ? "chevron-up" : "chevron-down"} 
-                        size={20} 
-                        color={colors.gray[600]} 
-                      />
-                    </TouchableOpacity>
-                    {expandedRecommendations['health'] && (
-                      <View style={styles.recommendationContent}>
-                        <Text style={styles.infoContent}>{recommendationData.healthTips}</Text>
-                      </View>
-                    )}
-                  </View>
-
                   {/* Conseils de sécurité */}
                   <View style={styles.infoCard}>
                     <TouchableOpacity
@@ -986,12 +970,21 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
                   {cityData.urgence.information_complementaire && (
                     <Text style={styles.infoSubtext}>{cityData.urgence.information_complementaire}</Text>
                   )}
+                  <View style={styles.emergencyButtonsContainer}>
+                    <TouchableOpacity
+                      style={styles.emergencyButton}
+                      onPress={handleCallEmergency}
+                    >
+                      <Ionicons name="call" size={16} color={colors.white} />
+                      <Text style={styles.emergencyButtonText}>Appeler</Text>
+                    </TouchableOpacity>
+                  </View>
                   <TouchableOpacity
-                    style={styles.emergencyButton}
-                    onPress={handleCallEmergency}
+                      style={[styles.emergencyButton, styles.emergencyCardsButton]}
+                      onPress={() => navigation.navigate('EmergencyCards')}
                   >
-                    <Ionicons name="call" size={16} color={colors.white} />
-                    <Text style={styles.emergencyButtonText}>Appeler</Text>
+                    <Ionicons name="medical" size={16} color={colors.white} />
+                    <Text style={styles.emergencyButtonText}>Consulter les fiches d'urgence</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1195,7 +1188,7 @@ const styles = StyleSheet.create({
   },
   emergencyButtonText: {
     color: colors.white,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     marginLeft: 8,
   },
@@ -1360,5 +1353,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     opacity: 0.8,
     marginLeft: 8,
+  },
+  emergencyButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  emergencyCardsButton: {
+    backgroundColor: colors.primary,
   },
 });

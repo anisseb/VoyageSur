@@ -30,6 +30,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [hasFreeTripAccess, setHasFreeTripAccess] = useState(true);
+  const [singleTripQuantity, setSingleTripQuantity] = useState(0);
   const insets = useSafeAreaInsets();
 
   // Recharger les voyages quand l'écran devient actif
@@ -40,15 +41,28 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }, [])
   );
 
+  // Recharger les informations d'achat quand l'écran devient actif
+  useFocusEffect(
+    React.useCallback(() => {
+      checkSubscriptionStatus();
+    }, [])
+  );
+
   // Vérifier le statut d'abonnement
   const checkSubscriptionStatus = async () => {
     try {
-      const [premium, freeTrip] = await Promise.all([
-        purchaseService.isPremium(),
-        purchaseService.hasFreeTripAccess()
-      ]);
-      setIsPremium(premium);
-      setHasFreeTripAccess(freeTrip);
+      const purchaseInfo = await purchaseService.getPurchaseInfo();
+      setIsPremium(purchaseInfo.isPremium);
+      setHasFreeTripAccess(purchaseInfo.hasFreeTripAccess);
+      
+      // Récupérer la quantité d'achat unique
+      if (purchaseInfo.singleTrip && purchaseInfo.singleTrip.quantity) {
+        setSingleTripQuantity(purchaseInfo.singleTrip.quantity);
+      } else {
+        setSingleTripQuantity(0);
+      }
+      
+      console.log('Purchase info:', purchaseInfo);
     } catch (error) {
       console.error('Error checking subscription status:', error);
     }
@@ -113,7 +127,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     const endDate = new Date(trip.endDate);
 
     if (now < startDate) {
-      return { status: 'upcoming', text: 'À venir', color: colors.primary };
+      return { status: 'upcoming', text: 'À venir', color: colors.success };
     } else if (now >= startDate && now <= endDate) {
       return { status: 'ongoing', text: 'En cours', color: colors.info };
     } else {
@@ -143,29 +157,49 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
         {/* Bouton Nouveau Voyage */}
         <TouchableOpacity
-          style={styles.newTripButton}
+          style={[styles.newTripButton, !hasFreeTripAccess && styles.disabledButton]}
           onPress={() => navigation.navigate('NewTrip')}
+          disabled={!hasFreeTripAccess}
         >
           <LinearGradient
-            colors={[colors.primary, colors.secondary]}
+            colors={hasFreeTripAccess ? [colors.primary, colors.secondary] : [colors.gray[400], colors.gray[500]]}
             style={styles.newTripGradient}
           >
             <Ionicons name="add-circle" size={24} color={colors.white} />
-            <Text style={styles.newTripText}>Nouveau Voyage</Text>
+            <Text style={styles.newTripText}>
+              Nouveau Voyage
+              {!isPremium && hasFreeTripAccess && singleTripQuantity > 0 && (
+                <Text style={styles.tripCountText}> ({singleTripQuantity})</Text>
+              )}
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
 
         {/* Message sur le voyage gratuit et options d'achat */}
-        {!isPremium && hasFreeTripAccess && (
+        {!isPremium && (
           <View style={styles.section}>
             <View style={styles.freeTripCard}>
               <View style={styles.freeTripHeader}>
-                <Ionicons name="gift" size={24} color={colors.success} />
-                <Text style={styles.freeTripTitle}>Voyage Gratuit Disponible</Text>
+                <Ionicons 
+                  name={hasFreeTripAccess ? "gift" : "information-circle"} 
+                  size={24} 
+                  color={hasFreeTripAccess ? colors.success : colors.warning} 
+                />
+                              <Text style={styles.freeTripTitle}>
+                {hasFreeTripAccess 
+                  ? (isPremium ? 'Premium Actif' : `Voyage${singleTripQuantity > 1 ? 's' : ''} Disponible${singleTripQuantity > 1 ? 's' : ''}`)
+                  : 'Check santé non disponible'
+                }
+              </Text>
               </View>
               <Text style={styles.freeTripDescription}>
-                Vous avez accès à un voyage gratuit avec toutes les fonctionnalités de base. 
-                Pour plus de voyages, choisissez une option ci-dessous.
+                {hasFreeTripAccess 
+                  ? (isPremium 
+                      ? 'Vous avez un accès premium illimité à tous les voyages et fonctionnalités.'
+                      : `Vous avez accès à ${singleTripQuantity} voyage${singleTripQuantity > 1 ? 's' : ''} avec toutes les fonctionnalités de base. Pour plus de voyages, choisissez une option ci-dessous.`
+                    )
+                  : 'Vous n\'avez plus de voyages disponibles. Si vous voulez nous soutenir et en faire d\'autres, choisissez une option ci-dessous.'
+                }
               </Text>
               <View style={styles.freeTripOptions}>
                 <TouchableOpacity
@@ -271,7 +305,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         {/* Section Voyages Passés */}
         {pastTrips.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Voyages Passés</Text>
+            <Text style={styles.sectionTitle}>Voyages passés</Text>
             {pastTrips.map((trip) => {
               const cityInfo = trip.cityId ? cityData[trip.cityId] : null;
               const cityImage = cityInfo?.image_ville;
@@ -596,5 +630,14 @@ const styles = StyleSheet.create({
   },
   secondaryOptionText: {
     color: colors.info,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  tripCountText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: 'normal',
+    opacity: 0.9,
   },
 }); 
