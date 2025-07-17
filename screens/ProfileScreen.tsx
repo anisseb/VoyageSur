@@ -209,10 +209,12 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                     <Ionicons name="checkmark-circle" size={20} color={colors.white} />
                     <Text style={styles.featureText}>Accès aux recommandations IA ( conseils culturels, conseils pour la valise, coutumes locales etc ..)</Text>
                   </View>
+                  {/*
                   <View style={styles.featureItem}>
                     <Ionicons name="checkmark-circle" size={20} color={colors.white} />
                     <Text style={styles.featureText}>Notifications avancées</Text>
                   </View>
+                  */}
                 </View>
                 <TouchableOpacity
                   style={styles.upgradeButton}
@@ -246,6 +248,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Paramètres</Text>
           <View style={styles.settingsList}>
+            {/*
             <TouchableOpacity style={styles.settingItem}>
               <View style={styles.settingLeft}>
                 <Ionicons name="notifications" size={24} color={colors.primary} />
@@ -253,6 +256,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
+            */}
             <TouchableOpacity
               style={styles.settingItem}
               onPress={() => navigation.navigate('Privacy')}

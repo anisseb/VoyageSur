@@ -3,6 +3,7 @@ import { User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { configureGoogleSignIn } from '../config/googleSignIn';
 
 interface UserProfile {
   id: string;
@@ -202,6 +203,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     console.log('AuthContext: Initialisation de l\'écouteur d\'état d\'authentification');
+    
+    // Configurer Google Sign-In de manière sécurisée
+    try {
+      configureGoogleSignIn();
+    } catch (error) {
+      console.error('Erreur lors de la configuration Google Sign-In:', error);
+    }
     
     let unsubscribe: (() => void) | null = null;
     

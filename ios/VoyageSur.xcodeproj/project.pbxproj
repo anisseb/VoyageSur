@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		26057A5F2E2872C400ADF975 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 26057A5E2E2872C400ADF975 /* GoogleService-Info.plist */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		8408ADCCEFD74723A2DCD237 /* notif.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4E728A3B32AF4406942F682D /* notif.wav */; };
 		AE2E005F59A71A20CB095F10 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABB2FAAF1E4D7F56EDB01BF /* ExpoModulesProvider.swift */; };
@@ -18,13 +19,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0D21A1B73FCABA918C3BE194 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = VoyageSur/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		0D21A1B73FCABA918C3BE194 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = VoyageSur/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* VoyageSur.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoyageSur.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = VoyageSur/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = VoyageSur/Info.plist; sourceTree = "<group>"; };
 		159A9AD174BF9BC0064FED1A /* Pods-VoyageSur.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.release.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.release.xcconfig"; sourceTree = "<group>"; };
+		26057A5E2E2872C400ADF975 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3ABB2FAAF1E4D7F56EDB01BF /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-VoyageSur/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		4E728A3B32AF4406942F682D /* notif.wav */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = notif.wav; path = VoyageSur/notif.wav; sourceTree = "<group>"; };
+		4E728A3B32AF4406942F682D /* notif.wav */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = notif.wav; path = VoyageSur/notif.wav; sourceTree = "<group>"; };
 		8952E1467EE7D3AC3C56409B /* Pods-VoyageSur.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VoyageSur.debug.xcconfig"; path = "Target Support Files/Pods-VoyageSur/Pods-VoyageSur.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = VoyageSur/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
@@ -52,7 +54,6 @@
 				8952E1467EE7D3AC3C56409B /* Pods-VoyageSur.debug.xcconfig */,
 				159A9AD174BF9BC0064FED1A /* Pods-VoyageSur.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -64,6 +65,7 @@
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
+				26057A5E2E2872C400ADF975 /* GoogleService-Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				4E728A3B32AF4406942F682D /* notif.wav */,
 				0D21A1B73FCABA918C3BE194 /* PrivacyInfo.xcprivacy */,
@@ -169,8 +171,8 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = XB4J8ZF2UP;
 						LastSwiftMigration = 1250;
-						DevelopmentTeam = "XB4J8ZF2UP";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -203,6 +205,7 @@
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				8408ADCCEFD74723A2DCD237 /* notif.wav in Resources */,
 				BACB48196572CF9E93283272 /* PrivacyInfo.xcprivacy in Resources */,
+				26057A5F2E2872C400ADF975 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,7 +404,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = VoyageSur/VoyageSur.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XB4J8ZF2UP;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -421,15 +427,12 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.anisse3000.voyagesur;
-				PRODUCT_NAME = "VoyageSur";
+				PRODUCT_NAME = VoyageSur;
 				SWIFT_OBJC_BRIDGING_HEADER = "VoyageSur/VoyageSur-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "XB4J8ZF2UP";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Debug;
 		};
@@ -440,7 +443,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = VoyageSur/VoyageSur.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XB4J8ZF2UP;
 				INFOPLIST_FILE = VoyageSur/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -455,14 +461,11 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.anisse3000.voyagesur;
-				PRODUCT_NAME = "VoyageSur";
+				PRODUCT_NAME = VoyageSur;
 				SWIFT_OBJC_BRIDGING_HEADER = "VoyageSur/VoyageSur-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "XB4J8ZF2UP";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Release;
 		};
