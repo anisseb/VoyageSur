@@ -381,7 +381,7 @@ export default function SubscriptionScreen({ navigation }: SubscriptionScreenPro
               <Text style={styles.infoText}>
                 • Les abonnements se renouvellent automatiquement{'\n'}
                 • Vous pouvez annuler à tout moment{'\n'}
-                • Paiement sécurisé via App Store/Google Play
+                • Paiement sécurisé via {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
               </Text>
             </View>
           </View>
