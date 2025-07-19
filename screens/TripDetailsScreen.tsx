@@ -9,6 +9,7 @@ import {
   Alert,
   Linking,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +19,9 @@ import { TravelPlan } from '../types';
 import { travelPlanService, cityService, vaccineService, medicineService, symptomService } from '../services/firebaseService';
 import { weatherService, WeatherResponse } from '../services/weatherService';
 import { recommendationService, RecommendationResponse } from '../services/recommendationService';
+import { pdfExportService } from '../services/pdfExportService';
 import { useAuth } from '../contexts/AuthContext';
+import * as Haptics from 'expo-haptics';
 
 interface TripDetailsScreenProps {
   navigation: any;
@@ -78,7 +81,7 @@ interface CachedTripData {
 }
 
 export default function TripDetailsScreen({ navigation, route }: TripDetailsScreenProps) {
-  const { tripId } = route.params;
+  const { tripId, fromNewTrip } = route.params;
   const [trip, setTrip] = useState<TravelPlan | null>(null);
   const [cityData, setCityData] = useState<CityData | null>(null);
   const [vaccines, setVaccines] = useState<VaccineData[]>([]);
@@ -93,6 +96,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   const [expandedSymptoms, setExpandedSymptoms] = useState<{ [key: string]: boolean }>({});
   const [expandedRecommendations, setExpandedRecommendations] = useState<{ [key: string]: boolean }>({});
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<number | null>(null);
   const { user } = useAuth();
 
@@ -122,9 +126,41 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
     return 'Date non disponible';
   };
 
+  // Fonction utilitaire pour convertir le travelType en label
+  const getTravelTypeLabel = (travelType: string): string => {
+    const travelTypes = [
+      { label: 'Tourisme', value: 'tourism' },
+      { label: 'Affaires', value: 'business' },
+      { label: 'Backpacking', value: 'backpacking' },
+      { label: 'Voyage de noces', value: 'wedding' },
+      { label: 'Voyage de famille', value: 'family' },
+      { label: 'Voyage de groupe', value: 'group' },
+      { label: 'Voyage de couple', value: 'couple' },
+      { label: 'Voyage de solitaire', value: 'solitary' },
+      { label: 'Voyage de jeunesse', value: 'youth' },
+      { label: 'Voyage de seniors', value: 'seniors' },
+    ];
+    
+    const found = travelTypes.find(t => t.value === travelType);
+    return found ? found.label : travelType;
+  };
+
   useEffect(() => {
     loadTripDetails();
   }, [tripId]);
+
+  // Gestionnaire pour le bouton retour
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
+      // Si on vient de créer un nouveau voyage, rediriger vers Home
+      if (fromNewTrip) {
+        e.preventDefault();
+        navigation.navigate('Home');
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, fromNewTrip]);
 
   // Fonctions pour gérer le cache local
   const getCacheKey = (tripId: string) => `trip_details_${tripId}`;
@@ -176,6 +212,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
 
   useEffect(() => {
     if (trip && trip.city) {
+      console.log('Voyage:', trip);
       // Vérifier si le voyage est terminé
       const isTripCompleted = new Date() > trip.endDate;
       
@@ -384,17 +421,20 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   };
 
   const handleCallEmergency = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (cityData?.urgence?.numero) {
       Linking.openURL(`tel:${cityData.urgence.numero}`);
     }
   };
 
   const handleOpenMaps = (address: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const encodedAddress = encodeURIComponent(address);
     Linking.openURL(`https://maps.google.com/?q=${encodedAddress}`);
   };
 
   const toggleMedicineExpansion = (medicineId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setExpandedMedicines(prev => ({
       ...prev,
       [medicineId]: !prev[medicineId]
@@ -402,6 +442,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   };
 
   const toggleSymptomExpansion = (symptomId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setExpandedSymptoms(prev => ({
       ...prev,
       [symptomId]: !prev[symptomId]
@@ -409,6 +450,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
   };
 
   const toggleRecommendationExpansion = (section: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setExpandedRecommendations(prev => ({
       ...prev,
       [section]: !prev[section]
@@ -419,6 +461,50 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
     return medicines.filter(medicine => 
       medicine.symptomes && medicine.symptomes.includes(symptomId)
     );
+  };
+
+  const handleExportPDF = async () => {
+    if (!trip) {
+      Alert.alert('Erreur', 'Aucun voyage à exporter.');
+      return;
+    }
+
+    // Haptic feedback au clic
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    setIsExportingPDF(true);
+
+    try {
+      // Préparer les données pour l'export
+      const tripData = {
+        trip,
+        cityData,
+        vaccines,
+        medicines,
+        symptoms,
+        weatherData,
+        recommendationData
+      };
+
+      // Générer le PDF directement
+      const pdfPath = await pdfExportService.exportTripToPDF(tripData);
+      
+      // Haptic feedback de succès
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      
+      // Ouvrir le menu de partage directement
+      await pdfExportService.sharePDF(pdfPath);
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'export PDF:', error);
+      
+      // Haptic feedback d'erreur
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      
+      Alert.alert('Erreur', 'Impossible de générer le PDF. Veuillez réessayer.');
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   if (loading) {
@@ -481,7 +567,9 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
           <View style={styles.headerOverlay}>
             <View style={styles.headerContent}>
               <View>
-                <Text style={styles.destinationText}>{trip.city || trip.country}</Text>
+                <Text style={styles.destinationText}>
+                  {cityData?.nom || trip.city || trip.country}
+                </Text>
                 <Text style={styles.countryText}>{trip.country}</Text>
               </View>
               <Ionicons name="airplane" size={40} color={colors.white} />
@@ -494,6 +582,17 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
           <View style={styles.sectionHeader}>
             <Ionicons name="information-circle" size={24} color={colors.primary} style={{ marginRight: 10, marginTop: 2 }} />
             <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Informations du voyage</Text>
+            <TouchableOpacity
+              style={styles.exportButton}
+              onPress={handleExportPDF}
+              disabled={isExportingPDF}
+            >
+              {isExportingPDF ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Ionicons name="download" size={20} color={colors.primary} />
+              )}
+            </TouchableOpacity>
           </View>
           <View style={styles.tripInfo}>
             <View style={styles.infoItem}>
@@ -512,7 +611,7 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
             </View>
             <View style={styles.infoItem}>
               <Ionicons name="briefcase" size={20} color={colors.primary} />
-              <Text style={styles.infoText}>{trip.travelType}</Text>
+              <Text style={styles.infoText}>{getTravelTypeLabel(trip.travelType)}</Text>
             </View>
           </View>
         </View>
@@ -866,6 +965,13 @@ export default function TripDetailsScreen({ navigation, route }: TripDetailsScre
                     <Text style={styles.infoTitle}>Centres de test</Text>
                   </View>
                   <Text style={styles.infoContent}>{cityData.test_vih}</Text>
+                  <TouchableOpacity
+                    style={styles.mapButton}
+                    onPress={() => handleOpenMaps(cityData.test_vih)}
+                  >
+                    <Ionicons name="map" size={16} color={colors.primary} />
+                    <Text style={styles.mapButtonText}>Voir sur la carte</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             )}
@@ -1185,6 +1291,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     marginTop: 12,
+    width: '100%',
+    textAlign: 'center',
   },
   emergencyButtonText: {
     color: colors.white,
@@ -1361,5 +1469,17 @@ const styles = StyleSheet.create({
   },
   emergencyCardsButton: {
     backgroundColor: colors.primary,
+  },
+  refreshButton: {
+    padding: 8,
+    marginLeft: 'auto',
+  },
+  exportButton: {
+    padding: 8,
+    marginLeft: 'auto',
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
 });

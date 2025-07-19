@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 import { TravelPlan } from '../types';
 import { travelPlanService, cityService } from '../services/firebaseService';
@@ -31,6 +32,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [isPremium, setIsPremium] = useState(false);
   const [hasFreeTripAccess, setHasFreeTripAccess] = useState(true);
   const [singleTripQuantity, setSingleTripQuantity] = useState(0);
+  const [showPastTrips, setShowPastTrips] = useState(false);
   const insets = useSafeAreaInsets();
 
   // Recharger les voyages quand l'écran devient actif
@@ -68,15 +70,51 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
+  const checkAndMoveExpiredTrips = async () => {
+    try {
+      if (!user?.uid) return;
+      
+      console.log('Vérification des voyages expirés...');
+      
+      // Charger les voyages actuels
+      const currentTrips = await travelPlanService.getByUserId(user.uid);
+      const allCurrentTrips = [...(currentTrips.active || []), ...(currentTrips.past || [])];
+      
+      // Vérifier s'il y a des voyages actifs qui sont expirés
+      const expiredActiveTrips = (currentTrips.active || []).filter(trip => isTripExpired(trip));
+      
+      if (expiredActiveTrips.length > 0) {
+        console.log(`${expiredActiveTrips.length} voyage(s) expiré(s) trouvé(s), nettoyage en cours...`);
+        await travelPlanService.cleanupExpiredTripsForUser(user.uid);
+        console.log('Nettoyage des voyages expirés terminé');
+        return true; // Indique qu'un nettoyage a été effectué
+      } else {
+        console.log('Aucun voyage expiré trouvé');
+        return false;
+      }
+    } catch (error) {
+      console.error('Erreur lors du nettoyage des voyages expirés:', error);
+      return false;
+    }
+  };
+
   const loadTrips = async () => {
     try {
       if (user) {
+        // D'abord vérifier et déplacer les voyages expirés
+        const cleanupPerformed = await checkAndMoveExpiredTrips();
+        
+        // Ensuite charger les voyages mis à jour
         const trips = await travelPlanService.getByUserId(user.uid);
-        setActiveTrips(trips.active || []);
-        setPastTrips(trips.past || []);
+        
+        // Réorganiser les voyages selon leur statut actuel en temps réel
+        const allTrips = [...(trips.active || []), ...(trips.past || [])];
+        const organizedTrips = organizeTripsByStatus(allTrips);
+        
+        setActiveTrips(organizedTrips.active);
+        setPastTrips(organizedTrips.past);
         
         // Charger les données de ville pour tous les voyages
-        const allTrips = [...(trips.active || []), ...(trips.past || [])];
         const cityDataMap: { [key: string]: any } = {};
         
         for (const trip of allTrips) {
@@ -117,10 +155,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
-  const isTripExpired = (trip: TravelPlan) => {
-    return new Date() > trip.endDate;
-  };
-
   const getTripStatus = (trip: TravelPlan) => {
     const now = new Date();
     const startDate = new Date(trip.startDate);
@@ -133,6 +167,31 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     } else {
       return { status: 'completed', text: 'Terminé', color: colors.gray[500] };
     }
+  };
+
+  // Fonction pour vérifier si un voyage est expiré en temps réel
+  const isTripExpired = (trip: TravelPlan) => {
+    const now = new Date();
+    const endDate = new Date(trip.endDate);
+    return now > endDate;
+  };
+
+  // Fonction pour filtrer et réorganiser les voyages selon leur statut actuel
+  const organizeTripsByStatus = (trips: TravelPlan[]) => {
+    const now = new Date();
+    const active: TravelPlan[] = [];
+    const past: TravelPlan[] = [];
+
+    trips.forEach(trip => {
+      const endDate = new Date(trip.endDate);
+      if (now > endDate) {
+        past.push(trip);
+      } else {
+        active.push(trip);
+      }
+    });
+
+    return { active, past };
   };
 
   return (
@@ -158,7 +217,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         {/* Bouton Nouveau Voyage */}
         <TouchableOpacity
           style={[styles.newTripButton, !hasFreeTripAccess && styles.disabledButton]}
-          onPress={() => navigation.navigate('NewTrip')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('NewTrip');
+          }}
           disabled={!hasFreeTripAccess}
         >
           <LinearGradient
@@ -241,7 +303,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 <TouchableOpacity
                   key={trip.id}
                   style={styles.tripCard}
-                  onPress={() => navigation.navigate('TripDetails', { tripId: trip.id })}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    navigation.navigate('TripDetails', { tripId: trip.id });
+                  }}
                 >
                   {/* Image de la ville en header */}
                   {cityImage && (
@@ -305,8 +370,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         {/* Section Voyages Passés */}
         {pastTrips.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Voyages passés</Text>
-            {pastTrips.map((trip) => {
+            <TouchableOpacity
+              style={styles.sectionHeader}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowPastTrips(!showPastTrips);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.sectionTitle}>Voyages passés</Text>
+              <Ionicons 
+                name={showPastTrips ? "chevron-up" : "chevron-down"} 
+                size={24} 
+                color={colors.text.primary} 
+              />
+            </TouchableOpacity>
+            {showPastTrips && pastTrips.map((trip) => {
               const cityInfo = trip.cityId ? cityData[trip.cityId] : null;
               const cityImage = cityInfo?.image_ville;
               
@@ -314,7 +393,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 <TouchableOpacity
                   key={trip.id}
                   style={[styles.tripCard, styles.pastTripCard]}
-                  onPress={() => navigation.navigate('TripDetails', { tripId: trip.id })}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    navigation.navigate('TripDetails', { tripId: trip.id });
+                  }}
                 >
                   {/* Image de la ville en header */}
                   {cityImage && (
@@ -430,6 +512,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.text.primary,
+    marginBottom: 15,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 15,
   },
   loadingContainer: {

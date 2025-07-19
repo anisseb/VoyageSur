@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 import { useAuth } from '../contexts/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,6 +48,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
 
   const handleSaveProfile = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await updateUserProfile(editForm);
       setShowEditModal(false);
@@ -58,6 +60,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   };
 
   const handleEditProfile = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setEditForm({
       firstName: userProfile?.firstName || '',
       lastName: userProfile?.lastName || '',
@@ -218,7 +221,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 </View>
                 <TouchableOpacity
                   style={styles.upgradeButton}
-                  onPress={() => navigation.navigate('Subscription')}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    navigation.navigate('Subscription');
+                  }}
                 >
                   <Text style={styles.upgradeButtonText}>Voir les offres</Text>
                 </TouchableOpacity>
@@ -233,7 +239,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <View style={styles.settingsList}>
             <TouchableOpacity 
               style={styles.settingItem}
-              onPress={() => navigation.navigate('EmergencyCards')}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.navigate('EmergencyCards');
+              }}
             >
               <View style={styles.settingLeft}>
                 <Ionicons name="medical" size={24} color={colors.primary} />
@@ -259,7 +268,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             */}
             <TouchableOpacity
               style={styles.settingItem}
-              onPress={() => navigation.navigate('Privacy')}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.navigate('Privacy');
+              }}
             >
               <View style={styles.settingLeft}>
                 <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
@@ -270,7 +282,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
             <TouchableOpacity 
               style={styles.settingItem}
-              onPress={() => navigation.navigate('HelpSupport')}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.navigate('HelpSupport');
+              }}
             >
               <View style={styles.settingLeft}>
                 <Ionicons name="help-circle" size={24} color={colors.primary} />
@@ -281,7 +296,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
             <TouchableOpacity 
               style={styles.settingItem}
-              onPress={() => navigation.navigate('About')}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.navigate('About');
+              }}
             >
               <View style={styles.settingLeft}>
                 <Ionicons name="information-circle" size={24} color={colors.primary} />
@@ -297,6 +315,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <TouchableOpacity 
             style={styles.logoutButton}
             onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               Alert.alert(
                 'Déconnexion',
                 'Êtes-vous sûr de vouloir vous déconnecter ?',
@@ -329,7 +348,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Modifier le profil</Text>
-                  <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <TouchableOpacity onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowEditModal(false);
+                  }}>
                     <Ionicons name="close" size={24} color={colors.text.primary} />
                   </TouchableOpacity>
                 </View>
@@ -423,7 +445,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 <View style={styles.modalFooter}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => setShowEditModal(false)}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowEditModal(false);
+                    }}
                   >
                     <Text style={styles.cancelButtonText}>Annuler</Text>
                   </TouchableOpacity>

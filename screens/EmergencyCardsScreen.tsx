@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, getDocs } from 'firebase/firestore';
@@ -91,7 +92,10 @@ export default function EmergencyCardsScreen({ navigation }: EmergencyCardsScree
     <TouchableOpacity
       key={card.id}
       style={[styles.emergencyCard, card.urgence && styles.urgentCard]}
-      onPress={() => navigation.navigate('EmergencyCardDetail', { card })}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        navigation.navigate('EmergencyCardDetail', { card });
+      }}
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleContainer}>
@@ -137,7 +141,10 @@ export default function EmergencyCardsScreen({ navigation }: EmergencyCardsScree
           <View style={styles.headerContent}>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => navigation.goBack()}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.goBack();
+              }}
             >
               <Ionicons name="arrow-back" size={24} color={colors.white} />
             </TouchableOpacity>
@@ -166,7 +173,10 @@ export default function EmergencyCardsScreen({ navigation }: EmergencyCardsScree
         <View style={styles.headerContent}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.goBack();
+            }}
           >
             <Ionicons name="arrow-back" size={24} color={colors.white} />
           </TouchableOpacity>

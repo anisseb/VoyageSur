@@ -54,7 +54,7 @@ export interface TravelPlan {
   startDate: Date;
   endDate: Date;
   duration: number;
-  travelType: 'business' | 'Loisirs' | 'backpacking' | 'family';
+  travelType: 'business' | 'tourisme' | 'backpacking' | 'family';
   travelers: number;
   createdAt: Date;
   updatedAt: Date;

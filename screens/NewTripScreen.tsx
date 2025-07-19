@@ -268,7 +268,7 @@ export default function NewTripScreen({ navigation }: NewTripScreenProps) {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('TripDetails', { tripId }),
+            onPress: () => navigation.navigate('TripDetails', { tripId, fromNewTrip: true }),
           },
         ]
       );

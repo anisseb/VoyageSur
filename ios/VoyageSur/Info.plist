@@ -27,8 +27,6 @@
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
-        <key>CFBundleURLName</key>
-        <string>com.anisse3000.voyagesur</string>
         <key>CFBundleURLSchemes</key>
         <array>
           <string>myapp</string>
@@ -36,8 +34,6 @@
         </array>
       </dict>
       <dict>
-        <key>CFBundleURLName</key>
-        <string>GoogleSignIn</string>
         <key>CFBundleURLSchemes</key>
         <array>
           <string>com.googleusercontent.apps.632781822153-78i2onj98gl7dqlnn7spa0vn9o096n6u</string>
@@ -109,6 +105,6 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     <key>googleServicesFile</key>
-    <string>GoogleService-Info.plist</string>
+    <string>./credentials/GoogleService-Info.plist</string>
   </dict>
 </plist>

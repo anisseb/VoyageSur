@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -65,7 +66,10 @@ export default function EmergencyCardDetailScreen({ navigation, route }: Emergen
         <View style={styles.headerContent}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.goBack();
+            }}
           >
             <Ionicons name="arrow-back" size={24} color={colors.white} />
           </TouchableOpacity>
